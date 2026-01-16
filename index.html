@@ -3,265 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayerFLOW - Web IPTV Player</title>
-    <meta name="referrer" content="no-referrer">
-    
-    <!-- Meta Tags -->
-    <meta name="description" content="Player IPTV web com proxy automático para listas HTTP em ambiente HTTPS.">
+    <title>PlayerFLOW - Enterprise Web Player</title>
+    <meta name="description" content="Reprodutor IPTV Web Profissional com suporte a Xtream Codes e detecção inteligente de protocolo.">
     <meta name="theme-color" content="#0f172a">
+    <meta name="referrer" content="no-referrer">
 
-    <!-- Tailwind CSS -->
+    <!-- Bibliotecas Essenciais -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- HLS.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
-    
-    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+    <!-- Configuração Visual -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                        },
-                        dark: {
-                            900: '#0f172a',
-                            800: '#1e293b',
-                            700: '#334155',
-                        }
+                        brand: { 500: '#6366f1', 600: '#4f46e5' }, // Indigo
+                        dark: { 900: '#0f172a', 800: '#1e293b', 700: '#334155' } // Slate
                     },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
+                    animation: { 'fade-in': 'fadeIn 0.3s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(5px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
     </script>
 
     <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        body { background-color: #0f172a; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
-        .glass { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6366f1; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #6366f1; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Player Clean UI */
+        video:focus { outline: none; }
     </style>
 </head>
-<body class="bg-dark-900 text-gray-100 font-sans antialiased overflow-hidden h-screen flex flex-col">
+<body class="font-sans antialiased overflow-hidden h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
-    <!-- Modal Setup -->
-    <div id="setupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-dark-800 p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-dark-700 m-4">
-            <div class="text-center mb-8">
-                <i class="ph ph-television-simple text-6xl text-brand-500 mb-4 inline-block"></i>
-                <h1 class="text-3xl font-bold text-white mb-2">Bem-vindo ao StreamFlow</h1>
-                <p class="text-gray-400">Carregue sua lista M3U para começar a assistir</p>
+    <!-- 1. TELA DE SETUP (Drag & Drop) -->
+    <div id="setupScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-dark-900 p-4">
+        <div class="max-w-md w-full bg-dark-800 rounded-2xl shadow-2xl border border-dark-700 p-8 text-center animate-fade-in">
+            <div class="w-16 h-16 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-500">
+                <i class="ph ph-play-circle text-4xl"></i>
             </div>
+            <h1 class="text-2xl font-bold text-white mb-2">PlayerFLOW</h1>
+            <p class="text-gray-400 text-sm mb-8">Arraste seu arquivo .M3U aqui ou selecione para carregar sua biblioteca.</p>
+            
+            <label class="block w-full border-2 border-dashed border-dark-700 hover:border-brand-500 hover:bg-dark-700/50 rounded-xl p-8 cursor-pointer transition-all group">
+                <div class="flex flex-col items-center">
+                    <i class="ph ph-upload-simple text-3xl text-gray-500 group-hover:text-white mb-2 transition-colors"></i>
+                    <span class="text-sm font-medium text-gray-400 group-hover:text-white">Selecionar Arquivo</span>
+                </div>
+                <input id="fileInput" type="file" class="hidden" accept=".m3u,.m3u8,.txt">
+            </label>
 
-            <div class="space-y-6">
-                <div class="flex border-b border-dark-700">
-                    <button onclick="switchTab('file')" id="tab-file" class="flex-1 pb-4 text-brand-500 border-b-2 border-brand-500 font-medium transition">Arquivo .M3U</button>
-                    <button onclick="switchTab('url')" id="tab-url" class="flex-1 pb-4 text-gray-400 hover:text-white font-medium transition">URL / Link</button>
-                </div>
-
-                <div id="content-file" class="tab-content block">
-                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-dark-700 rounded-lg cursor-pointer hover:bg-dark-700/50 transition bg-dark-800">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="ph ph-upload-simple text-3xl mb-2 text-gray-400"></i>
-                            <p class="mb-2 text-sm text-gray-400"><span class="font-semibold">Clique para enviar</span> sua lista</p>
-                            <p class="text-xs text-gray-500">Aceita .m3u, .m3u8 e .txt</p>
-                        </div>
-                        <input id="fileInput" type="file" class="hidden" accept=".m3u,.m3u8,.txt" />
-                    </label>
-                </div>
-
-                <div id="content-url" class="tab-content hidden">
-                    <div class="space-y-2">
-                        <input id="urlInput" type="text" placeholder="Cole o link da sua lista aqui..." class="w-full bg-dark-900 border border-dark-700 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-500 transition text-white">
-                        <button onclick="loadFromUrl()" class="w-full bg-brand-600 hover:bg-brand-500 text-white px-6 py-3 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                            Carregar Lista
-                            <i class="ph ph-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="loadingState" class="hidden flex flex-col items-center justify-center py-4">
-                    <div class="loader mb-3"></div>
-                    <p id="loadingText" class="text-sm text-gray-400">Processando canais...</p>
-                </div>
+            <div id="setupLoader" class="hidden mt-6">
+                <div class="loader w-8 h-8 border-2"></div>
+                <p class="text-xs text-gray-500 mt-2">Processando canais...</p>
             </div>
         </div>
     </div>
 
-    <!-- Layout Principal -->
-    <div class="flex h-full">
-        <!-- Sidebar (Adicionado ID mainSidebar para controle) -->
-        <aside class="hidden lg:flex w-64 bg-dark-800 border-r border-dark-700 flex-col z-20 transition-all duration-300" id="mainSidebar">
-            <div class="h-16 flex items-center px-6 border-b border-dark-700 shrink-0">
-                <i class="ph ph-play-circle text-3xl text-brand-500"></i>
-                <span class="ml-3 font-bold text-xl">PlayerFLOW</span>
+    <!-- 2. LAYOUT PRINCIPAL -->
+    <div id="appLayout" class="hidden h-full flex flex-col lg:flex-row">
+        
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-72 bg-dark-800 border-r border-dark-700 flex flex-col z-20 shrink-0">
+            <!-- Header Logo -->
+            <div class="h-16 flex items-center px-6 border-b border-dark-700">
+                <i class="ph ph-waves text-brand-500 text-2xl mr-3"></i>
+                <span class="font-bold text-lg tracking-tight">PlayerFLOW</span>
             </div>
-            <nav class="flex-1 overflow-y-auto py-4 px-2 custom-scroll space-y-1">
-                <!-- Botão Início -->
-                <button onclick="showHomeScreen()" class="nav-item w-full flex items-center p-3 rounded-lg bg-brand-600/10 text-brand-500" id="btn-home">
-                    <i class="ph ph-house text-xl"></i>
-                    <span class="ml-3 font-semibold">Início</span>
-                </button>
-                
-                <div class="my-2 border-t border-dark-700 mx-2"></div>
 
-                <button onclick="filterCategory('favorites')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
-                    <i class="ph ph-heart text-xl"></i><span class="ml-3">Favoritos</span>
+            <!-- Navegação -->
+            <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+                <button onclick="navTo('home')" class="nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium bg-brand-600/10 text-brand-500 transition-colors">
+                    <i class="ph ph-house text-lg mr-3"></i> Início
                 </button>
-                <button onclick="filterCategory('live')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
-                    <i class="ph ph-television text-xl"></i><span class="ml-3">Canais TV</span>
+                <div class="pt-4 pb-2 px-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Biblioteca</div>
+                <button onclick="navTo('live')" class="nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                    <i class="ph ph-television text-lg mr-3"></i> TV Ao Vivo
                 </button>
-                <button onclick="filterCategory('movies')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
-                    <i class="ph ph-film-strip text-xl"></i><span class="ml-3">Filmes</span>
+                <button onclick="navTo('movies')" class="nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                    <i class="ph ph-film-strip text-lg mr-3"></i> Filmes
                 </button>
-                <button onclick="filterCategory('series')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
-                    <i class="ph ph-cards text-xl"></i><span class="ml-3">Séries</span>
+                <button onclick="navTo('series')" class="nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                    <i class="ph ph-cards text-lg mr-3"></i> Séries
                 </button>
-                <button onclick="filterCategory('all')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
-                    <i class="ph ph-squares-four text-xl"></i><span class="ml-3">Todos</span>
+                <button onclick="navTo('favorites')" class="nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-700 transition-colors">
+                    <i class="ph ph-heart text-lg mr-3"></i> Favoritos
                 </button>
-
-                <div class="mt-6 px-3 mb-2 text-xs font-bold text-gray-500 uppercase">Grupos Rápidos</div>
-                <div id="groupList" class="space-y-1 pb-4"></div>
             </nav>
-            <div class="p-4 border-t border-dark-700 shrink-0">
-                <button onclick="location.reload()" class="flex items-center w-full text-red-400 hover:text-red-300 transition p-2 rounded hover:bg-red-400/10">
-                    <i class="ph ph-sign-out text-xl"></i><span class="ml-3 text-sm font-medium">Trocar Lista</span>
+
+            <!-- Rodapé Sidebar -->
+            <div class="p-4 border-t border-dark-700">
+                <button onclick="location.reload()" class="flex items-center text-xs text-red-400 hover:text-red-300 transition-colors">
+                    <i class="ph ph-sign-out text-lg mr-2"></i> Sair / Trocar Lista
                 </button>
             </div>
         </aside>
 
-        <!-- Main -->
-        <main class="flex-1 flex flex-col bg-dark-900 relative min-w-0 transition-all duration-300">
-            <!-- Mobile Header (Adicionado ID mobileHeader) -->
-            <div class="lg:hidden h-16 bg-dark-800 border-b border-dark-700 flex items-center justify-between px-4 shrink-0" id="mobileHeader">
-                 <div class="flex items-center"><i class="ph ph-play-circle text-2xl text-brand-500"></i><span class="ml-2 font-bold text-lg">PlayerFLOW</span></div>
-                <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="text-white p-2"><i class="ph ph-list text-2xl"></i></button>
-            </div>
-            <!-- Mobile Menu -->
-            <div id="mobileMenu" class="hidden lg:hidden bg-dark-800 border-b border-dark-700 absolute top-16 left-0 right-0 z-30 p-4 shadow-xl">
-                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="showHomeScreen(); toggleMobileMenu()" class="p-2 bg-dark-700 rounded text-sm">Início</button>
-                    <button onclick="filterCategory('favorites'); toggleMobileMenu()" class="p-2 bg-dark-700 rounded text-sm">Favoritos</button>
-                 </div>
-                 <button onclick="location.reload()" class="w-full mt-4 p-2 bg-red-900/30 text-red-400 rounded text-sm">Sair</button>
-            </div>
-            
-            <!-- Topbar (Adicionado ID mainHeader) -->
-            <header class="h-16 glass flex items-center justify-between px-4 lg:px-8 z-10 sticky top-0 shrink-0" id="mainHeader">
-                <div class="flex items-center bg-dark-900/50 rounded-full px-4 py-2 w-full max-w-md border border-dark-700 focus-within:border-brand-500 transition">
-                    <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
-                    <input id="searchInput" type="text" placeholder="Pesquisar..." class="bg-transparent border-none focus:outline-none text-white ml-3 w-full placeholder-gray-500">
+        <!-- Área de Conteúdo -->
+        <main class="flex-1 flex flex-col relative bg-dark-900 min-w-0">
+            <!-- Topbar Busca -->
+            <header class="h-16 border-b border-dark-700 flex items-center justify-between px-6 bg-dark-900/50 backdrop-blur-md sticky top-0 z-10">
+                <div class="relative w-full max-w-md">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input id="searchInput" type="text" placeholder="Buscar canal, filme ou série..." 
+                           class="w-full bg-dark-800 border border-dark-700 rounded-full pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors">
                 </div>
-                <div class="text-right hidden sm:block">
-                    <p id="channelCount" class="text-xs text-gray-400">0 itens</p>
-                    <p class="text-sm font-semibold text-white truncate max-w-[150px]" id="categoryTitle">Início</p>
+                <div class="hidden sm:block text-right">
+                    <div id="headerTitle" class="text-sm font-bold text-white">Início</div>
+                    <div id="headerCount" class="text-xs text-gray-500">0 itens</div>
                 </div>
             </header>
 
-            <!-- CONTEÚDO PRINCIPAL -->
-            <div id="mainContainer" class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll relative">
+            <!-- Container de Scroll -->
+            <div id="mainScroll" class="flex-1 overflow-y-auto p-6 custom-scroll">
                 
-                <!-- TELA 1: HOME (CARTÕES) -->
-                <div id="homeScreen" class="hidden flex-col items-center justify-center min-h-[calc(100vh-10rem)] animate-fade-in w-full">
-                    <div class="text-center mb-10">
-                        <div class="flex items-center justify-center gap-2 mb-2">
-                            <i class="ph ph-play-circle text-5xl text-brand-500"></i>
-                            <h1 class="text-4xl lg:text-5xl font-bold text-white tracking-tight">PlayerFLOW</h1>
+                <!-- VIEW 1: HOME DASHBOARD -->
+                <div id="viewHome" class="max-w-5xl mx-auto py-8 animate-fade-in">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-white mb-2">O que vamos assistir hoje?</h2>
+                        <p class="text-gray-400">Selecione uma categoria para explorar sua lista.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div onclick="navTo('live')" class="group cursor-pointer bg-gradient-to-br from-dark-800 to-dark-800 hover:from-blue-900/20 hover:to-dark-800 border border-dark-700 hover:border-blue-500/50 rounded-2xl p-8 text-center transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                            <div class="w-16 h-16 bg-dark-900 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-television text-3xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-1">TV Ao Vivo</h3>
+                            <p id="countLive" class="text-sm text-gray-500">0 Canais</p>
                         </div>
-                        <p class="text-gray-400 text-lg">Seu universo de entretenimento</p>
-                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
-                        <!-- Card TV Ao Vivo -->
-                        <button onclick="filterCategory('live')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-brand-500/50 transition z-10 shadow-lg">
-                                <i class="ph ph-television text-5xl text-brand-500 group-hover:scale-110 transition"></i>
+                        <div onclick="navTo('movies')" class="group cursor-pointer bg-gradient-to-br from-dark-800 to-dark-800 hover:from-purple-900/20 hover:to-dark-800 border border-dark-700 hover:border-purple-500/50 rounded-2xl p-8 text-center transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                            <div class="w-16 h-16 bg-dark-900 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-film-strip text-3xl"></i>
                             </div>
-                            <span class="text-2xl font-bold text-white z-10">TV Ao Vivo</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-live">0 Canais</span>
-                        </button>
+                            <h3 class="text-xl font-bold text-white mb-1">Filmes</h3>
+                            <p id="countMovies" class="text-sm text-gray-500">0 Títulos</p>
+                        </div>
 
-                        <!-- Card Filmes -->
-                        <button onclick="filterCategory('movies')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-purple-500/50 transition z-10 shadow-lg">
-                                <i class="ph ph-film-strip text-5xl text-purple-500 group-hover:scale-110 transition"></i>
+                        <div onclick="navTo('series')" class="group cursor-pointer bg-gradient-to-br from-dark-800 to-dark-800 hover:from-emerald-900/20 hover:to-dark-800 border border-dark-700 hover:border-emerald-500/50 rounded-2xl p-8 text-center transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                            <div class="w-16 h-16 bg-dark-900 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-500 group-hover:scale-110 transition-transform">
+                                <i class="ph ph-cards text-3xl"></i>
                             </div>
-                            <span class="text-2xl font-bold text-white z-10">Filmes</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-movies">0 Títulos</span>
-                        </button>
-
-                        <!-- Card Séries -->
-                        <button onclick="filterCategory('series')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-emerald-500/50 transition z-10 shadow-lg">
-                                <i class="ph ph-cards text-5xl text-emerald-500 group-hover:scale-110 transition"></i>
-                            </div>
-                            <span class="text-2xl font-bold text-white z-10">Séries</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-series">0 Títulos</span>
-                        </button>
-                    </div>
-
-                    <!-- Botão Favoritos na Home -->
-                    <button onclick="filterCategory('favorites')" class="mt-10 flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors px-6 py-2 rounded-full border border-dark-700 hover:border-red-500/50 hover:bg-dark-800">
-                        <i class="ph ph-heart-fill"></i>
-                        <span>Acessar Favoritos</span>
-                    </button>
-                </div>
-
-                <!-- TELA 2: SUBCATEGORIAS (PASTAS) -->
-                <div id="subcategoriesView" class="hidden w-full max-w-7xl mx-auto animate-fade-in pt-4">
-                    <div class="flex items-center mb-6">
-                        <button onclick="showHomeScreen()" class="mr-4 p-2 rounded-full hover:bg-dark-800 text-gray-400 hover:text-white transition">
-                            <i class="ph ph-arrow-left text-2xl"></i>
-                        </button>
-                        <h2 class="text-2xl font-bold text-white" id="subcategoryTitle">Categorias</h2>
-                    </div>
-                    <div id="subcategoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        <!-- Cards de Categorias injetados via JS -->
+                            <h3 class="text-xl font-bold text-white mb-1">Séries</h3>
+                            <p id="countSeries" class="text-sm text-gray-500">0 Títulos</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- TELA 3: LISTA DE CANAIS/CONTEÚDO (Grid Final) -->
-                <div id="channelsView" class="hidden w-full max-w-7xl mx-auto pt-4">
-                    <div class="flex items-center mb-4" id="channelsHeader">
-                        <button onclick="goBackToSubcategories()" class="mr-4 p-2 rounded-full hover:bg-dark-800 text-gray-400 hover:text-white transition">
-                            <i class="ph ph-arrow-left text-2xl"></i>
-                        </button>
-                        <h2 class="text-xl font-bold text-white truncate" id="currentGroupTitle">Lista</h2>
+                <!-- VIEW 2: CATEGORIAS (Pastas) -->
+                <div id="viewCategories" class="hidden animate-fade-in">
+                    <div class="flex items-center mb-6 gap-3">
+                        <button onclick="navTo('home')" class="p-2 hover:bg-dark-700 rounded-full text-gray-400 hover:text-white transition"><i class="ph ph-arrow-left text-xl"></i></button>
+                        <h2 id="catTitle" class="text-2xl font-bold text-white">Categorias</h2>
                     </div>
+                    <div id="gridCategories" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+                </div>
 
-                    <div id="contentGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6 content-start pb-8"></div>
-                    <div id="loadMoreContainer" class="hidden w-full flex justify-center py-8">
-                        <button onclick="loadMoreChannels()" class="bg-dark-700 hover:bg-dark-600 text-white px-6 py-3 rounded-full font-medium transition shadow-lg">Carregar Mais</button>
+                <!-- VIEW 3: ITENS (Canais/Filmes) -->
+                <div id="viewItems" class="hidden animate-fade-in">
+                    <div class="flex items-center mb-6 gap-3">
+                        <button onclick="backToCat()" class="p-2 hover:bg-dark-700 rounded-full text-gray-400 hover:text-white transition"><i class="ph ph-arrow-left text-xl"></i></button>
+                        <h2 id="groupTitle" class="text-xl font-bold text-white truncate">Nome do Grupo</h2>
                     </div>
-                    <div id="emptyState" class="hidden flex flex-col items-center justify-center text-gray-500 py-20">
-                        <i class="ph ph-ghost text-6xl mb-4"></i><p>Nada encontrado.</p>
+                    <div id="gridItems" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"></div>
+                    <div id="loadMore" class="hidden text-center py-8">
+                        <button onclick="renderGrid(true)" class="px-6 py-2 bg-dark-800 hover:bg-dark-700 text-white rounded-full text-sm font-medium transition">Carregar Mais</button>
                     </div>
                 </div>
 
@@ -269,85 +186,365 @@
         </main>
     </div>
 
-    <!-- Player -->
-    <div id="playerOverlay" class="fixed inset-0 z-[60] bg-black hidden flex flex-col">
-        <div class="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/90 to-transparent z-20 flex justify-between items-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+    <!-- 3. PLAYER OVERLAY -->
+    <div id="playerOverlay" class="fixed inset-0 z-50 bg-black hidden flex-col">
+        <!-- Controls Header -->
+        <div class="absolute top-0 left-0 right-0 p-6 bg-gradient-to-b from-black/80 to-transparent z-20 flex justify-between items-start opacity-0 hover:opacity-100 transition-opacity duration-300">
             <div class="flex items-center gap-4">
-                <button onclick="closePlayer()" class="text-white hover:text-brand-500 transition p-2 bg-black/40 rounded-full backdrop-blur-md"><i class="ph ph-arrow-left text-2xl"></i></button>
+                <button onclick="closePlayer()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white transition">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
                 <div>
-                    <h2 id="playerTitle" class="text-white font-bold text-lg drop-shadow-md">Título</h2>
-                    <p id="playerGroup" class="text-gray-300 text-xs drop-shadow-md">Info</p>
+                    <h2 id="playerTitle" class="text-white font-bold text-lg leading-tight drop-shadow-md">Título</h2>
+                    <div class="flex items-center gap-2">
+                        <span id="playerTag" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-brand-600 text-white">LIVE</span>
+                        <p id="playerSub" class="text-gray-300 text-xs drop-shadow-md">Info</p>
+                    </div>
                 </div>
             </div>
-            <button onclick="toggleAspectRatio()" class="text-white hover:text-brand-500 transition p-2 bg-black/40 rounded-full backdrop-blur-md"><i class="ph ph-frame-corners text-2xl"></i></button>
         </div>
 
-        <div class="flex-1 relative flex items-center justify-center bg-black w-full h-full">
-            <video id="videoPlayer" class="w-full h-full" controls autoplay playsinline></video>
+        <!-- Video Area -->
+        <div class="flex-1 relative flex items-center justify-center bg-black">
+            <video id="mainVideo" class="w-full h-full max-h-screen" controls autoplay playsinline crossorigin="anonymous"></video>
             
-            <div id="loadingOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
-                <div class="loader"></div>
+            <!-- Loading Spinner -->
+            <div id="playerLoader" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
+                <div class="loader border-brand-500"></div>
             </div>
 
-            <!-- Mensagem de Erro Avançada -->
-            <div id="playerError" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center text-center p-6 z-10">
-                <i class="ph ph-lock-key text-5xl text-yellow-500 mb-4 animate-bounce"></i>
-                <h3 class="text-xl font-bold text-white mb-2">Bloqueio de Segurança Detectado</h3>
-                <div class="bg-dark-800 p-4 rounded-lg max-w-md text-sm text-left mb-6 border border-dark-700">
-                    <p class="text-gray-300 mb-2"><strong class="text-white">O navegador bloqueou este canal</strong> porque ele não é seguro (HTTP), mas o site está em HTTPS.</p>
-                    <p class="text-gray-400 mb-2">O proxy automático falhou para este servidor.</p>
-                    <p class="text-brand-500 font-bold mb-1">Solução Única (PC):</p>
-                    <ol class="list-decimal list-inside text-gray-300 space-y-1 mb-4">
-                        <li>Clique no cadeado 🔒 na barra de endereço.</li>
-                        <li>Clique em "Configurações do Site".</li>
-                        <li>Procure por <strong>"Conteúdo não seguro"</strong> e mude para <strong>"Permitir"</strong>.</li>
-                        <li>Recarregue a página.</li>
-                    </ol>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="closePlayer()" class="px-6 py-2 border border-gray-600 text-white rounded hover:bg-gray-800">Fechar</button>
-                    <!-- Botão para forçar sem proxy -->
-                    <button onclick="retryWithoutProxy()" class="px-6 py-2 bg-brand-600 text-white rounded hover:bg-brand-500">Tentar Sem Proxy (Requer Permissão)</button>
+            <!-- Error Modal -->
+            <div id="playerError" class="absolute inset-0 z-30 bg-black/95 flex items-center justify-center p-6 hidden">
+                <div class="max-w-md w-full bg-dark-800 border border-dark-700 rounded-2xl p-6 text-center">
+                    <div class="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                        <i class="ph ph-warning-octagon text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Falha na Reprodução</h3>
+                    <p class="text-sm text-gray-400 mb-6">
+                        Detectamos um bloqueio de segurança. O servidor deste canal não é seguro (HTTP), mas o site é (HTTPS).
+                    </p>
+                    <div class="bg-dark-900/50 rounded-lg p-3 text-left text-xs text-gray-400 mb-6 border border-dark-700">
+                        <strong>Opção 1 (Melhor):</strong> Ative o <strong>Modo Proxy</strong> abaixo. Isso cria um túnel seguro para o vídeo.<br><br>
+                        <strong>Opção 2 (Manual):</strong> Desbloqueie o "Conteúdo Inseguro" nas configurações do cadeado 🔒 do navegador.
+                    </div>
+                    <div class="flex flex-col gap-3 justify-center sm:flex-row">
+                        <button onclick="retryWithProxy()" class="px-4 py-3 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center gap-2">
+                            <i class="ph ph-shield-check text-lg"></i>
+                            Ativar Modo Seguro (Proxy)
+                        </button>
+                        <button onclick="closePlayer()" class="px-4 py-3 rounded-lg border border-dark-600 text-gray-300 hover:text-white text-sm hover:bg-dark-700 transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- CORE LOGIC -->
     <script>
-        // --- Core Logic ---
-        let allChannels = [];
-        let filteredChannels = [];
-        let favorites = JSON.parse(localStorage.getItem('streamflow_favorites') || '[]');
-        let currentCategory = 'home'; 
-        let currentSubCategoryType = null; 
-        let hls = null;
-        let renderedCount = 0;
-        let loadTimeout = null;
-        const BATCH_SIZE = 48; 
-        const video = document.getElementById('videoPlayer');
-        // Proxy Público para contornar Mixed Content
-        const PROXY_URL = "https://corsproxy.io/?";
-        let currentPlayingUrl = ""; // Para retry sem proxy
+        // --- Estado Global ---
+        const PROXY_URL = 'https://corsproxy.io/?'; // Proxy Público para fallback
+        const state = {
+            channels: [],
+            filtered: [],
+            favorites: JSON.parse(localStorage.getItem('pflow_favs') || '[]'),
+            view: 'home', // home, cat, items
+            subType: null, // live, movies, series
+            currentGroup: null,
+            page: 0,
+            batch: 50,
+            currentChannelId: null // Para retry
+        };
 
+        const els = {
+            setup: document.getElementById('setupScreen'),
+            app: document.getElementById('appLayout'),
+            loader: document.getElementById('setupLoader'),
+            video: document.getElementById('mainVideo'),
+            pLoader: document.getElementById('playerLoader'),
+            pError: document.getElementById('playerError')
+        };
+
+        let hls = null;
+
+        // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            // Drag & Drop
+            const dropZone = document.querySelector('label');
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-brand-500'); });
+            dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('border-brand-500'); });
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropZone.classList.remove('border-brand-500');
+                if(e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]);
+            });
+            
+            document.getElementById('fileInput').addEventListener('change', e => {
+                if(e.target.files.length) loadFile(e.target.files[0]);
+            });
+
+            // Search
             document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 300));
-            video.addEventListener('error', handleVideoError);
-            video.addEventListener('waiting', () => {
-                document.getElementById('loadingOverlay').classList.remove('hidden');
-                clearTimeout(loadTimeout);
-                loadTimeout = setTimeout(() => {
-                    if (video.networkState === 2) { 
-                        // Se demorar muito, assume erro de proxy ou rede
-                        handleVideoError();
-                    }
-                }, 15000);
-            });
-            video.addEventListener('playing', () => {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                clearTimeout(loadTimeout);
-            });
+
+            // Player Events
+            els.video.addEventListener('waiting', () => els.pLoader.classList.remove('hidden'));
+            els.video.addEventListener('playing', () => els.pLoader.classList.add('hidden'));
+            els.video.addEventListener('error', () => showError());
         });
+
+        // --- Parser Enterprise (Correção de Links) ---
+        function loadFile(file) {
+            els.loader.classList.remove('hidden');
+            const reader = new FileReader();
+            reader.onload = e => {
+                parseContent(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseContent(text) {
+            const lines = text.split(/\r?\n/);
+            const data = [];
+            let current = null;
+
+            for(let line of lines) {
+                line = line.trim();
+                if(!line) continue;
+
+                if(line.startsWith('#EXTINF:')) {
+                    const meta = line.substring(8);
+                    const nameParts = meta.split(',');
+                    const name = nameParts[nameParts.length-1].trim();
+                    
+                    // Regex para extrair atributos
+                    const logo = (meta.match(/tvg-logo="([^"]*)"/) || [])[1] || '';
+                    let group = (meta.match(/group-title="([^"]*)"/) || [])[1] || 'Outros';
+                    
+                    current = { name, logo, group, id: '' }; // ID gerado depois
+                    
+                    // Detecção de Tipo
+                    const gLow = group.toLowerCase();
+                    if(gLow.includes('movie') || gLow.includes('filme')) current.type = 'movies';
+                    else if(gLow.includes('series') || gLow.includes('serie')) current.type = 'series';
+                    else current.type = 'live';
+
+                } else if(line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('://')) {
+                    if(current) {
+                        // --- CORREÇÃO CRÍTICA DE URL ---
+                        let url = line;
+                        
+                        // 1. Corrige formato abreviado "://domain:/path"
+                        if(url.startsWith('://')) {
+                            // Remove o "://" inicial
+                            let clean = url.substring(3);
+                            // Corrige porta vazia ":/" para "/"
+                            clean = clean.replace(':/', '/');
+                            // Adiciona protocolo padrão
+                            url = 'http://' + clean;
+                        }
+
+                        current.url = url;
+                        current.id = btoa(url).slice(0, 12); // ID curto base64
+                        data.push(current);
+                        current = null;
+                    }
+                }
+            }
+
+            if(data.length === 0) {
+                alert("Nenhum canal encontrado. Verifique o arquivo.");
+                els.loader.classList.add('hidden');
+                return;
+            }
+
+            state.channels = data.sort((a,b) => a.name.localeCompare(b.name));
+            
+            // Transição UI
+            els.setup.classList.add('hidden');
+            els.app.classList.remove('hidden');
+            els.app.classList.add('flex');
+            
+            updateHomeCounts();
+            navTo('home');
+        }
+
+        // --- Navegação ---
+        function navTo(target) {
+            state.view = target;
+            
+            // UI Reset
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.className = 'nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-700 transition-colors';
+            });
+            // Highlight active (simple logic based on onclick attr match)
+            const activeBtn = document.querySelector(`button[onclick="navTo('${target}')"]`);
+            if(activeBtn) activeBtn.className = 'nav-btn w-full flex items-center p-3 rounded-lg text-sm font-medium bg-brand-600/10 text-brand-500 transition-colors';
+
+            // View Switch
+            document.getElementById('viewHome').classList.add('hidden');
+            document.getElementById('viewCategories').classList.add('hidden');
+            document.getElementById('viewItems').classList.add('hidden');
+
+            if(target === 'home') {
+                document.getElementById('viewHome').classList.remove('hidden');
+                updateHeader('Início', state.channels.length + ' itens');
+            } else if(['live', 'movies', 'series'].includes(target)) {
+                state.subType = target;
+                renderCategories(target);
+            } else if(target === 'favorites') {
+                state.subType = 'favorites';
+                renderFavorites();
+            }
+        }
+
+        function renderCategories(type) {
+            document.getElementById('viewCategories').classList.remove('hidden');
+            const grid = document.getElementById('gridCategories');
+            grid.innerHTML = '';
+            
+            const groups = [...new Set(state.channels.filter(c => c.type === type).map(c => c.group))].sort();
+            
+            const titles = { 'live': 'TV Ao Vivo', 'movies': 'Filmes', 'series': 'Séries' };
+            document.getElementById('catTitle').innerText = titles[type];
+            updateHeader(titles[type], groups.length + ' Categorias');
+
+            groups.forEach(g => {
+                const count = state.channels.filter(c => c.group === g && c.type === type).length;
+                const el = document.createElement('div');
+                el.className = 'bg-dark-800 p-4 rounded-xl border border-dark-700 hover:border-brand-500 cursor-pointer transition-all hover:bg-dark-700';
+                el.onclick = () => openGroup(g);
+                el.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <i class="ph ph-folder-simple text-2xl text-brand-500"></i>
+                        <span class="text-xs font-bold bg-dark-900 px-2 py-1 rounded text-gray-400">${count}</span>
+                    </div>
+                    <div class="font-medium text-white truncate">${g}</div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        function openGroup(group) {
+            state.currentGroup = group;
+            state.filtered = state.channels.filter(c => c.group === group && c.type === state.subType);
+            state.page = 0;
+            
+            document.getElementById('viewCategories').classList.add('hidden');
+            document.getElementById('viewItems').classList.remove('hidden');
+            document.getElementById('groupTitle').innerText = group;
+            
+            document.getElementById('gridItems').innerHTML = '';
+            renderGrid();
+        }
+
+        function renderFavorites() {
+            state.filtered = state.channels.filter(c => state.favorites.includes(c.id));
+            state.page = 0;
+            state.currentGroup = 'Favoritos';
+
+            document.getElementById('viewItems').classList.remove('hidden');
+            document.getElementById('groupTitle').innerText = 'Meus Favoritos';
+            document.getElementById('gridItems').innerHTML = '';
+            
+            if(state.filtered.length === 0) {
+                document.getElementById('gridItems').innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">Nenhum favorito adicionado.</p>';
+                document.getElementById('loadMore').classList.add('hidden');
+            } else {
+                renderGrid();
+            }
+        }
+
+        function renderGrid(append = false) {
+            const grid = document.getElementById('gridItems');
+            const start = state.page * state.batch;
+            const end = start + state.batch;
+            const items = state.filtered.slice(start, end);
+            
+            items.forEach(c => {
+                const isFav = state.favorites.includes(c.id);
+                // Fallback de imagem
+                let img = c.logo;
+                if(!img || img.length < 5) img = `https://ui-avatars.com/api/?name=${encodeURI(c.name)}&background=1e293b&color=fff&size=128`;
+
+                const el = document.createElement('div');
+                el.className = 'group relative bg-dark-800 rounded-lg overflow-hidden border border-dark-700 hover:border-brand-500 transition-all';
+                el.innerHTML = `
+                    <div class="aspect-video bg-black relative cursor-pointer" onclick="playChannel('${c.id}')">
+                        <img src="${img}" class="w-full h-full object-contain p-2 opacity-80 group-hover:opacity-100 transition-opacity" loading="lazy" onerror="this.src='https://placehold.co/300x200/1e293b/FFF?text=No+Image'">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                            <i class="ph ph-play-circle text-4xl text-brand-500 drop-shadow-xl"></i>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="font-medium text-sm text-gray-200 truncate" title="${c.name}">${c.name}</div>
+                        <button onclick="toggleFav('${c.id}', this)" class="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:text-red-500 transition z-10 ${isFav ? 'text-red-500' : ''}">
+                            <i class="ph ${isFav ? 'ph-heart-fill' : 'ph-heart'} text-lg"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+
+            state.page++;
+            const hasMore = state.filtered.length > end;
+            const btn = document.getElementById('loadMore');
+            if(hasMore) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+        }
+
+        // --- Navegação Auxiliar ---
+        function backToCat() {
+            if(state.subType === 'favorites') navTo('home');
+            else renderCategories(state.subType);
+        }
+
+        function handleSearch(e) {
+            const q = e.target.value.toLowerCase();
+            if(!q) {
+                if(state.view === 'items') renderGrid(); // Reset
+                return;
+            }
+            
+            // Search Mode
+            document.getElementById('viewHome').classList.add('hidden');
+            document.getElementById('viewCategories').classList.add('hidden');
+            document.getElementById('viewItems').classList.remove('hidden');
+            
+            state.filtered = state.channels.filter(c => c.name.toLowerCase().includes(q));
+            state.page = 0;
+            state.currentGroup = 'Busca';
+            
+            document.getElementById('groupTitle').innerText = `Resultados para "${q}"`;
+            document.getElementById('gridItems').innerHTML = '';
+            renderGrid();
+        }
+
+        function toggleFav(id, btn) {
+            const idx = state.favorites.indexOf(id);
+            if(idx > -1) {
+                state.favorites.splice(idx, 1);
+                btn.classList.remove('text-red-500');
+            } else {
+                state.favorites.push(id);
+                btn.classList.add('text-red-500');
+            }
+            localStorage.setItem('pflow_favs', JSON.stringify(state.favorites));
+            
+            // Refresh se estiver na tela de favoritos
+            if(state.subType === 'favorites') renderFavorites();
+        }
+
+        function updateHomeCounts() {
+            document.getElementById('countLive').innerText = state.channels.filter(c=>c.type==='live').length + ' Canais';
+            document.getElementById('countMovies').innerText = state.channels.filter(c=>c.type==='movies').length + ' Títulos';
+            document.getElementById('countSeries').innerText = state.channels.filter(c=>c.type==='series').length + ' Títulos';
+        }
+
+        function updateHeader(title, sub) {
+            document.getElementById('headerTitle').innerText = title;
+            document.getElementById('headerCount').innerText = sub;
+        }
 
         function debounce(func, wait) {
             let timeout;
@@ -357,461 +554,106 @@
             };
         }
 
-        // --- Layout Control ---
-        function toggleLayout(isHome) {
-            const sidebar = document.getElementById('mainSidebar');
-            const mainHeader = document.getElementById('mainHeader');
-            const mobileHeader = document.getElementById('mobileHeader');
-
-            if (isHome) {
-                sidebar.classList.remove('lg:flex'); sidebar.classList.add('hidden');
-                mainHeader.classList.remove('flex'); mainHeader.classList.add('hidden');
-                mobileHeader.classList.remove('flex'); mobileHeader.classList.add('hidden');
-            } else {
-                sidebar.classList.add('lg:flex'); sidebar.classList.remove('hidden');
-                mainHeader.classList.add('flex'); mainHeader.classList.remove('hidden');
-                mobileHeader.classList.add('flex'); mobileHeader.classList.remove('hidden');
-            }
-        }
-
-        // --- Parser Reforçado ---
-        function parseM3U(content) {
-            const lines = content.split(/\r?\n/);
-            const channels = [];
-            let currentChannel = { name: '', logo: '', group: 'Geral', url: '' };
-            let hasInfo = false;
-
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                if (line.startsWith('#EXTINF:')) {
-                    hasInfo = true;
-                    currentChannel = { name: '', logo: '', group: 'Geral', url: '' };
-                    const infoData = line.substring(8);
-                    const lastCommaIndex = infoData.lastIndexOf(',');
-                    currentChannel.name = lastCommaIndex !== -1 ? infoData.substring(lastCommaIndex + 1).trim() : "Canal Sem Nome";
-                    const logoMatch = line.match(/tvg-logo=["']([^"']*)["']/i);
-                    if (logoMatch) currentChannel.logo = logoMatch[1];
-                    const groupMatch = line.match(/group-title=["']([^"']*)["']/i);
-                    if (groupMatch) {
-                        currentChannel.group = groupMatch[1];
-                    } else if (currentChannel.name.toUpperCase().includes('FILMES')) {
-                        currentChannel.group = "Filmes";
-                    }
-                    const groupLower = currentChannel.group.toLowerCase();
-                    if (groupLower.match(/movie|filme|cinema|cine/)) currentChannel.type = 'movies';
-                    else if (groupLower.match(/series|série|temporada/)) currentChannel.type = 'series';
-                    else currentChannel.type = 'live';
-                } else if (isValidUrlLine(line)) {
-                    if (line.startsWith('://')) {
-                         let clean = line.substring(3);
-                         clean = clean.replace(':/', '/');
-                         line = 'http://' + clean; 
-                    }
-                    currentChannel.url = line;
-                    if (!hasInfo) {
-                        currentChannel.name = `Canal ${channels.length + 1}`;
-                        currentChannel.type = 'live';
-                    }
-                    if (currentChannel.name && currentChannel.url) {
-                        currentChannel.id = generateId(currentChannel.url);
-                        channels.push({ ...currentChannel });
-                    }
-                    hasInfo = false;
-                }
-            }
-            return channels;
-        }
-
-        function isValidUrlLine(line) {
-            return line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('://') || (line.endsWith('.ts') && !line.startsWith('#')) || (line.endsWith('.m3u8') && !line.startsWith('#')) || (line.endsWith('.mp4') && !line.startsWith('#'));
-        }
-
-        function generateId(url) {
-            let hash = 0;
-            for (let i = 0; i < url.length; i++) {
-                hash = ((hash << 5) - hash) + url.charCodeAt(i);
-                hash |= 0;
-            }
-            return Math.abs(hash).toString(36);
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            setLoading(true, "Lendo arquivo...");
-            const reader = new FileReader();
-            reader.onload = (e) => processPlaylist(e.target.result);
-            reader.readAsText(file);
-        }
-
-        async function loadFromUrl() {
-            let url = document.getElementById('urlInput').value.trim();
-            if(!url) return;
-            setLoading(true, "Baixando lista...");
-            try {
-                let response = await fetch(url);
-                if (!response.ok) throw new Error('Falha direta');
-                let text = await response.text();
-                processPlaylist(text);
-            } catch (err) {
-                setLoading(true, "Tentando Proxy...");
-                try {
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
-                    if (data.contents) processPlaylist(data.contents);
-                    else throw new Error("Vazio");
-                } catch (proxyErr) {
-                    alert('Erro ao baixar lista. Tente baixar o arquivo .m3u no seu PC.');
-                    setLoading(false);
-                }
-            }
-        }
-
-        function processPlaylist(content) {
-            setLoading(true, "Processando...");
-            setTimeout(() => {
-                allChannels = parseM3U(content);
-                if (allChannels.length === 0) {
-                    alert('Nenhum canal encontrado.');
-                    setLoading(false);
-                    return;
-                }
-                allChannels.sort((a, b) => a.name.localeCompare(b.name));
-                document.getElementById('setupModal').classList.add('hidden');
-                populateGroups();
-                updateHomeCounts();
-                showHomeScreen(); 
-                setLoading(false);
-            }, 100);
-        }
-
-        function updateHomeCounts() {
-            const liveCount = allChannels.filter(c => c.type === 'live').length;
-            const moviesCount = allChannels.filter(c => c.type === 'movies').length;
-            const seriesCount = allChannels.filter(c => c.type === 'series').length;
-            document.getElementById('count-live').textContent = `${liveCount} Canais`;
-            document.getElementById('count-movies').textContent = `${moviesCount} Títulos`;
-            document.getElementById('count-series').textContent = `${seriesCount} Títulos`;
-        }
-
-        function setLoading(active, text = "") {
-            const el = document.getElementById('loadingState');
-            if (active) {
-                el.classList.remove('hidden');
-                document.getElementById('loadingText').textContent = text;
-            } else {
-                el.classList.add('hidden');
-            }
-        }
-
-        // --- Navegação e Views ---
-
-        function showHomeScreen() {
-            currentCategory = 'home';
-            currentSubCategoryType = null;
-            toggleLayout(true);
-            document.getElementById('homeScreen').classList.remove('hidden');
-            document.getElementById('homeScreen').classList.add('flex');
-            document.getElementById('subcategoriesView').classList.add('hidden');
-            document.getElementById('channelsView').classList.add('hidden');
-        }
-
-        function renderSubcategories(type) {
-            currentSubCategoryType = type;
-            toggleLayout(false); 
-            const relevantGroups = [...new Set(allChannels.filter(c => c.type === type).map(c => c.group))].sort();
-            const grid = document.getElementById('subcategoriesGrid');
-            grid.innerHTML = '';
-            const titleMap = { 'live': 'TV Ao Vivo', 'movies': 'Filmes', 'series': 'Séries' };
-            document.getElementById('subcategoryTitle').textContent = `Categorias de ${titleMap[type] || 'Vídeo'}`;
-            if (relevantGroups.length === 0) grid.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma categoria encontrada.</p>';
-            relevantGroups.forEach(group => {
-                const count = allChannels.filter(c => c.group === group && c.type === type).length;
-                const card = document.createElement('button');
-                card.className = 'bg-dark-800 p-6 rounded-xl border border-dark-700 hover:border-brand-500 hover:bg-dark-700 transition-all text-left group flex flex-col justify-between h-32';
-                card.onclick = () => filterByGroup(group);
-                card.innerHTML = `
-                    <div class="flex items-start justify-between">
-                        <i class="ph ph-folder text-3xl text-brand-500 group-hover:text-white transition"></i>
-                        <span class="text-xs bg-dark-900 text-gray-400 px-2 py-1 rounded-full border border-dark-700">${count}</span>
-                    </div>
-                    <span class="font-medium text-white truncate w-full" title="${group}">${group}</span>
-                `;
-                grid.appendChild(card);
-            });
-            document.getElementById('homeScreen').classList.add('hidden');
-            document.getElementById('homeScreen').classList.remove('flex');
-            document.getElementById('subcategoriesView').classList.remove('hidden');
-            document.getElementById('channelsView').classList.add('hidden');
-            updateSidebarUI(type);
-        }
-
-        function goBackToSubcategories() {
-            if (currentSubCategoryType) renderSubcategories(currentSubCategoryType);
-            else showHomeScreen();
-        }
-
-        function renderChannels(channels, append = false) {
-            const grid = document.getElementById('contentGrid');
-            const empty = document.getElementById('emptyState');
-            const loadMoreBtn = document.getElementById('loadMoreContainer');
-            const countEl = document.getElementById('channelCount');
-            if(document.getElementById('mainSidebar').classList.contains('hidden')) toggleLayout(false);
-            document.getElementById('homeScreen').classList.add('hidden');
-            document.getElementById('homeScreen').classList.remove('flex');
-            document.getElementById('subcategoriesView').classList.add('hidden');
-            document.getElementById('channelsView').classList.remove('hidden');
-            if (!append) {
-                grid.innerHTML = '';
-                renderedCount = 0;
-                document.getElementById('mainContainer').scrollTop = 0;
-            }
-            countEl.innerText = `${channels.length} canais`;
-            if (channels.length === 0) {
-                empty.classList.remove('hidden');
-                loadMoreBtn.classList.add('hidden');
-                return;
-            }
-            empty.classList.add('hidden');
-            const nextBatch = channels.slice(renderedCount, renderedCount + BATCH_SIZE);
-            nextBatch.forEach(channel => {
-                const isFav = favorites.includes(channel.id);
-                const card = document.createElement('div');
-                card.className = 'group relative bg-dark-800 rounded-lg overflow-hidden cursor-pointer card-hover transition-all duration-300 aspect-video flex flex-col border border-dark-700';
-                card.onclick = (e) => { if(!e.target.closest('.fav-btn')) openPlayer(channel); };
-                let logoUrl = channel.logo;
-                if (!logoUrl || logoUrl.length < 5) {
-                    const initials = channel.name.substring(0,2).toUpperCase();
-                    logoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1e293b&color=6366f1&size=256&font-size=0.4&bold=true`;
-                }
-                card.innerHTML = `
-                    <div class="relative flex-1 bg-black w-full overflow-hidden">
-                        <img src="${logoUrl}" alt="${channel.name}" loading="lazy" class="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-500 opacity-90 group-hover:opacity-100" onerror="this.src='https://placehold.co/400x225/1e293b/FFF?text=No+Image'">
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center backdrop-blur-[2px]">
-                            <i class="ph ph-play-circle text-5xl text-brand-500 drop-shadow-xl scale-75 group-hover:scale-100 transition"></i>
-                        </div>
-                        <button class="fav-btn absolute top-2 right-2 p-2 rounded-full bg-black/60 hover:bg-brand-600 transition z-10 ${isFav ? 'text-red-500' : 'text-gray-300'}" onclick="toggleFavorite('${channel.id}')">
-                            <i class="ph ${isFav ? 'ph-heart-fill' : 'ph-heart'} text-lg"></i>
-                        </button>
-                    </div>
-                    <div class="p-3 bg-dark-800 border-t border-dark-700 z-10 relative">
-                        <h3 class="font-medium text-sm text-gray-200 truncate pr-4" title="${channel.name}">${channel.name}</h3>
-                        <p class="text-[10px] text-brand-500 uppercase font-bold tracking-wider truncate mt-1">${channel.group}</p>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-            renderedCount += nextBatch.length;
-            loadMoreBtn.classList.toggle('hidden', renderedCount >= channels.length);
-        }
-
-        function loadMoreChannels() { renderChannels(filteredChannels, true); }
+        // --- PLAYER ENGINE & PROXY ---
         
-        function filterCategory(cat) {
-            currentCategory = cat;
-            if (['live', 'movies', 'series'].includes(cat)) {
-                renderSubcategories(cat);
-            } else {
-                toggleLayout(false); 
-                applyFilters();
+        // Tenta reproduzir (Direct Mode primeiro)
+        function playChannel(id, forceProxy = false) {
+            const item = state.channels.find(c => c.id === id);
+            if(!item) return;
+
+            state.currentChannelId = id; // Guarda ID para retry
+
+            document.getElementById('playerOverlay').classList.remove('hidden');
+            document.getElementById('playerOverlay').classList.add('flex');
+            document.getElementById('playerTitle').innerText = item.name;
+            document.getElementById('playerSub').innerText = item.group;
+            document.getElementById('playerTag').innerText = item.type === 'live' ? 'LIVE' : 'VOD';
+            document.getElementById('playerTag').className = `text-[10px] uppercase font-bold px-2 py-0.5 rounded text-white ${item.type === 'live' ? 'bg-red-600' : 'bg-blue-600'}`;
+            
+            els.pError.classList.add('hidden');
+            els.pLoader.classList.remove('hidden');
+
+            let url = item.url;
+            
+            // 1. Correção HLS
+            if(url.includes('.ts')) url = url.replace('.ts', '.m3u8');
+
+            // 2. Aplica Proxy SE forçado (ou seja, se clicou no botão "Modo Seguro")
+            if(forceProxy) {
+                console.log("Modo Seguro Ativado: Usando Proxy");
+                url = PROXY_URL + encodeURIComponent(url);
             }
+
+            initVideo(url, forceProxy);
         }
 
-        function filterByGroup(group) {
-            updateSidebarUI(null, group);
-            currentCategory = 'group';
-            document.getElementById('currentGroupTitle').textContent = group;
-            filteredChannels = allChannels.filter(c => c.group === group);
-            renderChannels(filteredChannels);
-        }
+        function initVideo(url, isProxyActive) {
+            // DETECÇÃO NATIVA (MP4/MKV)
+            const isNative = url.match(/\.(mp4|mkv)(\?.*)?$/i);
 
-        function populateGroups() {
-            const groups = [...new Set(allChannels.map(c => c.group))].sort();
-            const groupList = document.getElementById('groupList');
-            groupList.innerHTML = '';
-            const limit = 20; 
-            groups.slice(0, limit).forEach(group => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full text-left px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-dark-700 rounded truncate transition';
-                btn.textContent = group;
-                btn.onclick = () => { filterByGroup(group); toggleMobileMenu(); };
-                groupList.appendChild(btn);
-            });
-        }
-
-        function updateSidebarUI(activeId, activeGroup = null) {
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('bg-brand-600/10', 'text-brand-500');
-                el.classList.add('text-gray-400');
-            });
-            if (activeId === 'home') {
-                const homeBtn = document.getElementById('btn-home');
-                if(homeBtn) { homeBtn.classList.remove('text-gray-400'); homeBtn.classList.add('bg-brand-600/10', 'text-brand-500'); }
+            if(isNative) {
+                if(hls) { hls.destroy(); hls = null; }
+                els.video.src = url;
+                els.video.play().catch(e => console.error("Autoplay prevent", e));
                 return;
             }
-            if (activeId) {
-                const btn = document.querySelector(`button[onclick="filterCategory('${activeId}')"]`);
-                if(btn) { btn.classList.remove('text-gray-400'); btn.classList.add('bg-brand-600/10', 'text-brand-500'); }
-            }
-            Array.from(document.getElementById('groupList').children).forEach(btn => {
-                if(btn.textContent === activeGroup) { btn.classList.add('text-brand-500', 'font-bold'); btn.classList.remove('text-gray-400'); }
-                else { btn.classList.remove('text-brand-500', 'font-bold'); btn.classList.add('text-gray-400'); }
-            });
-            const title = activeGroup || (activeId === 'all' ? 'Todos' : activeId === 'favorites' ? 'Favoritos' : activeId);
-            document.getElementById('categoryTitle').textContent = title;
-        }
 
-        function handleSearch(e) {
-            const query = e.target.value.toLowerCase();
-            if (currentCategory === 'home' && query.length > 0) {
-                 filterCategory('all');
-            }
-            applyFilters(query);
-        }
-
-        function applyFilters(searchQuery = '') {
-            let list = allChannels;
-            if (currentCategory === 'favorites') list = list.filter(c => favorites.includes(c.id));
-            else if (['live', 'movies', 'series'].includes(currentCategory)) list = list.filter(c => c.type === currentCategory);
-            const query = searchQuery || document.getElementById('searchInput').value.toLowerCase();
-            if (query) list = list.filter(c => c.name.toLowerCase().includes(query) || c.group.toLowerCase().includes(query));
-            filteredChannels = list;
-            renderChannels(list);
-        }
-
-        function toggleFavorite(id) {
-            favorites = favorites.includes(id) ? favorites.filter(fav => fav !== id) : [...favorites, id];
-            localStorage.setItem('streamflow_favorites', JSON.stringify(favorites));
-            const btn = document.querySelector(`button[onclick="toggleFavorite('${id}')"]`);
-            if(btn) {
-                 const isFav = favorites.includes(id);
-                 btn.innerHTML = `<i class="ph ${isFav ? 'ph-heart-fill' : 'ph-heart'} text-lg"></i>`;
-                 btn.classList.toggle('text-red-500', isFav);
-                 btn.classList.toggle('text-gray-300', !isFav);
-            }
-            if(currentCategory === 'favorites') applyFilters();
-        }
-
-        function toggleMobileMenu() { document.getElementById('mobileMenu').classList.add('hidden'); }
-
-        // --- Player e Proxy Logic ---
-        function openPlayer(channel) {
-            document.getElementById('playerOverlay').classList.remove('hidden');
-            document.getElementById('playerError').classList.add('hidden');
-            document.getElementById('playerTitle').textContent = channel.name;
-            document.getElementById('playerGroup').textContent = channel.group;
-
-            let playUrl = channel.url;
-            currentPlayingUrl = playUrl; // Guarda URL original para retry sem proxy
-            
-            // Se estiver em HTTPS e o link for HTTP, ativa o proxy automaticamente
-            if (window.location.protocol === 'https:' && playUrl.startsWith('http:')) {
-                console.log("Detectado HTTP em HTTPS. Usando Proxy...");
-                // Nota: O proxy é aplicado dentro do initVideo
-            }
-
-            if (playUrl.includes('.ts')) {
-                playUrl = playUrl.replace('.ts', '.m3u8');
-                currentPlayingUrl = playUrl;
-            }
-            
-            initVideo(playUrl, true); // Tenta COM proxy por defeito em ambiente seguro
-        }
-
-        function initVideo(url, useProxy = true) {
-            const isHttps = window.location.protocol === 'https:';
-            const isHttpStream = url.startsWith('http:');
-            const shouldProxy = isHttps && isHttpStream && useProxy;
-            
-            // URL Final (com proxy se necessário)
-            let finalUrl = url;
-            if (shouldProxy) {
-                finalUrl = PROXY_URL + encodeURIComponent(url);
-            }
-
-            // DETECÇÃO MP4/MKV
-            const isMP4 = url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.mkv');
-            
-            if (isMP4) {
-                 if(hls) { hls.destroy(); hls = null; }
-                 video.src = finalUrl;
-                 video.play().catch(e => console.error("Erro autoplay:", e));
-                 return;
-            }
-
-            // HLS
-            if (Hls.isSupported()) {
+            // MODO HLS
+            if(Hls.isSupported()) {
                 if(hls) hls.destroy();
-                hls = new Hls({ 
-                    enableWorker: true, 
+                hls = new Hls({
+                    enableWorker: true,
                     lowLatencyMode: true,
-                    // Intercepta e proxeia todos os fragmentos SE estivermos a usar proxy
+                    // Se o proxy estiver ativo, precisamos interceptar os fragmentos também!
                     xhrSetup: function (xhr, u) {
-                        if (shouldProxy && u.startsWith('http:')) {
+                        if (isProxyActive && !u.startsWith(PROXY_URL)) {
                             xhr.open('GET', PROXY_URL + encodeURIComponent(u));
                         }
                     }
                 });
                 
-                // Carrega a URL (já proxeada se necessário)
-                hls.loadSource(finalUrl);
-                hls.attachMedia(video);
+                hls.loadSource(url);
+                hls.attachMedia(els.video);
                 
-                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
+                hls.on(Hls.Events.MANIFEST_PARSED, () => els.video.play());
+                
                 hls.on(Hls.Events.ERROR, (e, data) => {
-                    if (data.fatal) {
+                    if(data.fatal) {
                         if(data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-                             hls.startLoad();
+                            console.log("Erro de rede HLS. Tentando recuperar...");
+                            hls.startLoad();
                         } else {
-                             handleVideoError();
+                            hls.destroy();
+                            showError();
                         }
                     }
                 });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari nativo (Difícil proxear sem Service Worker, mas tenta direto)
-                video.src = finalUrl;
-                video.play();
+            } else if(els.video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari Nativo
+                els.video.src = url;
+                els.video.play();
             }
+        }
+
+        function retryWithProxy() {
+            if(state.currentChannelId) {
+                playChannel(state.currentChannelId, true); // Força Proxy = true
+            }
+        }
+
+        function showError() {
+            els.pLoader.classList.add('hidden');
+            els.pError.classList.remove('hidden');
         }
 
         function closePlayer() {
             document.getElementById('playerOverlay').classList.add('hidden');
-            video.pause();
-            video.src = '';
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            clearTimeout(loadTimeout);
+            document.getElementById('playerOverlay').classList.remove('flex');
+            els.video.pause();
+            els.video.src = '';
             if(hls) { hls.destroy(); hls = null; }
         }
 
-        function handleVideoError() { 
-            document.getElementById('playerError').classList.remove('hidden'); 
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-        
-        function retryStream() { 
-            document.getElementById('playerError').classList.add('hidden'); 
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            // Tenta recarregar com configurações originais
-            if(hls) hls.startLoad();
-            else video.load();
-        }
-
-        // Função de Retry SEM Proxy (para quando o utilizador desbloqueia conteúdo misto)
-        function retryWithoutProxy() {
-            document.getElementById('playerError').classList.add('hidden');
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            console.log("Tentando reproduzir SEM proxy (Direct)...");
-            initVideo(currentPlayingUrl, false);
-        }
-
-        function toggleAspectRatio() { video.style.objectFit = video.style.objectFit === 'cover' ? 'contain' : 'cover'; }
-        
-        function switchTab(t){
-             ['file','url'].forEach(x=>document.getElementById(`tab-${x}`).className=`flex-1 pb-4 font-medium transition ${x===t?'text-brand-500 border-b-2 border-brand-500':'text-gray-400'}`);
-             ['file','url'].forEach(x=>document.getElementById(`content-${x}`).classList.toggle('hidden', x!==t));
-        }
     </script>
 </body>
 </html>
