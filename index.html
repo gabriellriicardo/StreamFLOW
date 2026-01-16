@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayerFLOW</title>
+    <title>StreamFlow - Web IPTV Player</title>
     
     <!-- Meta Tags -->
     <meta name="description" content="Player IPTV web com correção automática para listas TS/M3U8.">
@@ -37,6 +37,15 @@
                             900: '#0f172a',
                             800: '#1e293b',
                             700: '#334155',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
                 }
@@ -110,13 +119,31 @@
                 <span class="ml-3 font-bold text-xl">StreamFlow</span>
             </div>
             <nav class="flex-1 overflow-y-auto py-4 px-2 custom-scroll space-y-1">
-                <button onclick="filterCategory('all')" class="nav-item w-full flex items-center p-3 rounded-lg bg-brand-600/10 text-brand-500"><i class="ph ph-squares-four text-xl"></i><span class="ml-3">Todos</span></button>
-                <button onclick="filterCategory('favorites')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white"><i class="ph ph-heart text-xl"></i><span class="ml-3">Favoritos</span></button>
+                <!-- Botão Início Adicionado -->
+                <button onclick="showHomeScreen()" class="nav-item w-full flex items-center p-3 rounded-lg bg-brand-600/10 text-brand-500" id="btn-home">
+                    <i class="ph ph-house text-xl"></i>
+                    <span class="ml-3 font-semibold">Início</span>
+                </button>
+                
                 <div class="my-2 border-t border-dark-700 mx-2"></div>
-                <button onclick="filterCategory('live')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white"><i class="ph ph-television text-xl"></i><span class="ml-3">Canais TV</span></button>
-                <button onclick="filterCategory('movies')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white"><i class="ph ph-film-strip text-xl"></i><span class="ml-3">Filmes</span></button>
-                <button onclick="filterCategory('series')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white"><i class="ph ph-cards text-xl"></i><span class="ml-3">Séries</span></button>
-                <div class="mt-6 px-3 mb-2 text-xs font-bold text-gray-500 uppercase">Categorias</div>
+
+                <button onclick="filterCategory('favorites')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
+                    <i class="ph ph-heart text-xl"></i><span class="ml-3">Favoritos</span>
+                </button>
+                <button onclick="filterCategory('live')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
+                    <i class="ph ph-television text-xl"></i><span class="ml-3">Canais TV</span>
+                </button>
+                <button onclick="filterCategory('movies')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
+                    <i class="ph ph-film-strip text-xl"></i><span class="ml-3">Filmes</span>
+                </button>
+                <button onclick="filterCategory('series')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
+                    <i class="ph ph-cards text-xl"></i><span class="ml-3">Séries</span>
+                </button>
+                <button onclick="filterCategory('all')" class="nav-item w-full flex items-center p-3 rounded-lg text-gray-400 hover:text-white">
+                    <i class="ph ph-squares-four text-xl"></i><span class="ml-3">Todos</span>
+                </button>
+
+                <div class="mt-6 px-3 mb-2 text-xs font-bold text-gray-500 uppercase">Grupos</div>
                 <div id="groupList" class="space-y-1 pb-4"></div>
             </nav>
             <div class="p-4 border-t border-dark-700 shrink-0">
@@ -136,7 +163,7 @@
             <!-- Mobile Menu -->
             <div id="mobileMenu" class="hidden lg:hidden bg-dark-800 border-b border-dark-700 absolute top-16 left-0 right-0 z-30 p-4 shadow-xl">
                  <div class="grid grid-cols-2 gap-2">
-                    <button onclick="filterCategory('all'); toggleMobileMenu()" class="p-2 bg-dark-700 rounded text-sm">Todos</button>
+                    <button onclick="showHomeScreen(); toggleMobileMenu()" class="p-2 bg-dark-700 rounded text-sm">Início</button>
                     <button onclick="filterCategory('favorites'); toggleMobileMenu()" class="p-2 bg-dark-700 rounded text-sm">Favoritos</button>
                  </div>
                  <button onclick="location.reload()" class="w-full mt-4 p-2 bg-red-900/30 text-red-400 rounded text-sm">Sair</button>
@@ -150,19 +177,64 @@
                 </div>
                 <div class="text-right hidden sm:block">
                     <p id="channelCount" class="text-xs text-gray-400">0 canais</p>
-                    <p class="text-sm font-semibold text-white truncate max-w-[150px]" id="categoryTitle">Todos</p>
+                    <p class="text-sm font-semibold text-white truncate max-w-[150px]" id="categoryTitle">Início</p>
                 </div>
             </header>
 
-            <!-- Grid -->
-            <div id="scrollContainer" class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll">
-                <div id="contentGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6 content-start pb-8"></div>
-                <div id="loadMoreContainer" class="hidden w-full flex justify-center py-8">
-                    <button onclick="loadMoreChannels()" class="bg-dark-700 hover:bg-dark-600 text-white px-6 py-3 rounded-full font-medium transition shadow-lg">Carregar Mais</button>
+            <!-- CONTEÚDO PRINCIPAL -->
+            <div id="mainContainer" class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll relative">
+                
+                <!-- TELA INICIAL (Home Screen) -->
+                <div id="homeScreen" class="hidden flex-col items-center justify-center min-h-[calc(100vh-10rem)] animate-fade-in">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-2">O que você quer assistir?</h2>
+                        <p class="text-gray-400">Selecione uma categoria para começar</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
+                        <!-- Card TV Ao Vivo -->
+                        <button onclick="filterCategory('live')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-brand-500/50 transition z-10">
+                                <i class="ph ph-television text-4xl text-brand-500 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="text-xl font-bold text-white z-10">TV Ao Vivo</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-live">0 Canais</span>
+                        </button>
+
+                        <!-- Card Filmes -->
+                        <button onclick="filterCategory('movies')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-purple-500/50 transition z-10">
+                                <i class="ph ph-film-strip text-4xl text-purple-500 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="text-xl font-bold text-white z-10">Filmes</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-movies">0 Títulos</span>
+                        </button>
+
+                        <!-- Card Séries -->
+                        <button onclick="filterCategory('series')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-emerald-500/50 transition z-10">
+                                <i class="ph ph-cards text-4xl text-emerald-500 group-hover:scale-110 transition"></i>
+                            </div>
+                            <span class="text-xl font-bold text-white z-10">Séries</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-series">0 Títulos</span>
+                        </button>
+                    </div>
                 </div>
-                <div id="emptyState" class="hidden flex flex-col items-center justify-center text-gray-500 py-20">
-                    <i class="ph ph-ghost text-6xl mb-4"></i><p>Nada encontrado.</p>
+
+                <!-- LISTA DE CANAIS (Grid) -->
+                <div id="channelsView" class="hidden">
+                    <div id="contentGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 lg:gap-6 content-start pb-8"></div>
+                    <div id="loadMoreContainer" class="hidden w-full flex justify-center py-8">
+                        <button onclick="loadMoreChannels()" class="bg-dark-700 hover:bg-dark-600 text-white px-6 py-3 rounded-full font-medium transition shadow-lg">Carregar Mais</button>
+                    </div>
+                    <div id="emptyState" class="hidden flex flex-col items-center justify-center text-gray-500 py-20">
+                        <i class="ph ph-ghost text-6xl mb-4"></i><p>Nada encontrado.</p>
+                    </div>
                 </div>
+
             </div>
         </main>
     </div>
@@ -199,7 +271,7 @@
         let allChannels = [];
         let filteredChannels = [];
         let favorites = JSON.parse(localStorage.getItem('streamflow_favorites') || '[]');
-        let currentCategory = 'all'; 
+        let currentCategory = 'home'; // Inicializa em Home
         let hls = null;
         let renderedCount = 0;
         const BATCH_SIZE = 48; 
@@ -255,7 +327,6 @@
                     else currentChannel.type = 'live';
 
                 } else if (isValidUrlLine(line)) {
-                    // CORREÇÃO 1: Tratar URLs "://..."
                     if (line.startsWith('://')) {
                         line = 'http' + line; 
                     }
@@ -338,9 +409,20 @@
                 
                 document.getElementById('setupModal').classList.add('hidden');
                 populateGroups();
-                filterCategory('all');
+                updateHomeCounts();
+                showHomeScreen(); // MOSTRA A TELA INICIAL
                 setLoading(false);
             }, 100);
+        }
+
+        function updateHomeCounts() {
+            const liveCount = allChannels.filter(c => c.type === 'live').length;
+            const moviesCount = allChannels.filter(c => c.type === 'movies').length;
+            const seriesCount = allChannels.filter(c => c.type === 'series').length;
+
+            document.getElementById('count-live').textContent = `${liveCount} Canais`;
+            document.getElementById('count-movies').textContent = `${moviesCount} Títulos`;
+            document.getElementById('count-series').textContent = `${seriesCount} Títulos`;
         }
 
         function setLoading(active, text = "") {
@@ -367,16 +449,32 @@
             });
         }
 
+        function showHomeScreen() {
+            currentCategory = 'home';
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('homeScreen').classList.add('flex'); // Ensure flex display
+            document.getElementById('channelsView').classList.add('hidden');
+            
+            updateSidebarUI('home');
+            document.getElementById('categoryTitle').textContent = 'Início';
+            document.getElementById('channelCount').textContent = `${allChannels.length} total`;
+        }
+
         function renderChannels(channels, append = false) {
             const grid = document.getElementById('contentGrid');
             const empty = document.getElementById('emptyState');
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const countEl = document.getElementById('channelCount');
             
+            // Troca da Home para Grid
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('homeScreen').classList.remove('flex');
+            document.getElementById('channelsView').classList.remove('hidden');
+
             if (!append) {
                 grid.innerHTML = '';
                 renderedCount = 0;
-                document.getElementById('scrollContainer').scrollTop = 0;
+                document.getElementById('mainContainer').scrollTop = 0;
             }
 
             countEl.innerText = `${channels.length} canais`;
@@ -424,14 +522,36 @@
         }
 
         function loadMoreChannels() { renderChannels(filteredChannels, true); }
-        function filterCategory(cat) { currentCategory = cat; updateSidebarUI(cat); applyFilters(); }
-        function filterByGroup(group) { updateSidebarUI(null, group); currentCategory = 'group'; filteredChannels = allChannels.filter(c => c.group === group); renderChannels(filteredChannels); }
+        
+        function filterCategory(cat) { 
+            currentCategory = cat; 
+            updateSidebarUI(cat); 
+            applyFilters(); 
+        }
+
+        function filterByGroup(group) { 
+            updateSidebarUI(null, group); 
+            currentCategory = 'group'; 
+            filteredChannels = allChannels.filter(c => c.group === group); 
+            renderChannels(filteredChannels); 
+        }
 
         function updateSidebarUI(activeId, activeGroup = null) {
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('bg-brand-600/10', 'text-brand-500');
                 el.classList.add('text-gray-400');
             });
+
+            // Tratamento especial para o botão Home
+            if (activeId === 'home') {
+                const homeBtn = document.getElementById('btn-home');
+                if(homeBtn) {
+                    homeBtn.classList.remove('text-gray-400');
+                    homeBtn.classList.add('bg-brand-600/10', 'text-brand-500');
+                }
+                return;
+            }
+
             if (activeId) {
                 const btn = document.querySelector(`button[onclick="filterCategory('${activeId}')"]`);
                 if(btn) { btn.classList.remove('text-gray-400'); btn.classList.add('bg-brand-600/10', 'text-brand-500'); }
@@ -443,10 +563,19 @@
             document.getElementById('categoryTitle').textContent = activeGroup || (activeId === 'all' ? 'Todos' : activeId === 'favorites' ? 'Favoritos' : activeId);
         }
 
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase();
+            // Se começar a digitar, sai da home e vai para a busca global ou da categoria atual
+            if (currentCategory === 'home' && query.length > 0) {
+                 filterCategory('all');
+            }
+            applyFilters(query);
+        }
+
         function applyFilters(searchQuery = '') {
             let list = allChannels;
             if (currentCategory === 'favorites') list = list.filter(c => favorites.includes(c.id));
-            else if (currentCategory !== 'all' && currentCategory !== 'group') list = list.filter(c => c.type === currentCategory);
+            else if (currentCategory !== 'all' && currentCategory !== 'group' && currentCategory !== 'home') list = list.filter(c => c.type === currentCategory);
 
             const query = searchQuery || document.getElementById('searchInput').value.toLowerCase();
             if (query) list = list.filter(c => c.name.toLowerCase().includes(query) || c.group.toLowerCase().includes(query));
@@ -470,7 +599,7 @@
 
         function toggleMobileMenu() { document.getElementById('mobileMenu').classList.add('hidden'); }
 
-        // --- Player (CORREÇÃO 2: Conversão TS -> M3U8) ---
+        // --- Player ---
         function openPlayer(channel) {
             document.getElementById('playerOverlay').classList.remove('hidden');
             document.getElementById('playerError').classList.add('hidden');
@@ -478,9 +607,6 @@
             document.getElementById('playerGroup').textContent = channel.group;
 
             let playUrl = channel.url;
-
-            // TRUQUE DE MÁGICA: Se for arquivo .ts, muda para .m3u8
-            // Isso força o servidor Xtream a enviar HLS compatível com web
             if (playUrl.includes('.ts')) {
                 console.log("Convertendo stream TS para M3U8 para compatibilidade web...");
                 playUrl = playUrl.replace('.ts', '.m3u8');
