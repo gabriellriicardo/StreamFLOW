@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayerFLOW - Web IPTV Player</title>
+    <!-- Permite carregar conteúdo HTTP em ambiente HTTPS (Tentativa) -->
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta name="referrer" content="no-referrer">
     
     <!-- Meta Tags -->
     <meta name="description" content="Player IPTV web com correção automática para listas TS/M3U8.">
@@ -72,7 +75,7 @@
             <div class="text-center mb-8">
                 <i class="ph ph-television-simple text-6xl text-brand-500 mb-4 inline-block"></i>
                 <h1 class="text-3xl font-bold text-white mb-2">PlayerFLOW</h1>
-                <p class="text-gray-400">Suporte adicionado para listas .TS e Xtream Codes</p>
+                <p class="text-gray-400">Carregue sua lista para começar</p>
             </div>
 
             <div class="space-y-6">
@@ -283,10 +286,21 @@
 
         <div class="flex-1 relative flex items-center justify-center bg-black w-full h-full">
             <video id="videoPlayer" class="w-full h-full" controls autoplay playsinline></video>
-            <div id="playerError" class="hidden absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-center p-4 z-10">
-                <i class="ph ph-warning-octagon text-5xl text-red-500 mb-4"></i>
-                <h3 class="text-xl font-bold text-white mb-2">Erro de Reprodução</h3>
-                <p class="text-gray-400 mb-6 max-w-md">O stream não respondeu. Pode estar offline ou bloqueado por segurança (Mixed Content).</p>
+            
+            <!-- Mensagem de Erro Avançada -->
+            <div id="playerError" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center text-center p-6 z-10">
+                <i class="ph ph-lock-key text-5xl text-yellow-500 mb-4 animate-bounce"></i>
+                <h3 class="text-xl font-bold text-white mb-2">Erro: Conteúdo Bloqueado</h3>
+                <div class="bg-dark-800 p-4 rounded-lg max-w-md text-sm text-left mb-6 border border-dark-700">
+                    <p class="text-gray-300 mb-2"><strong class="text-white">O navegador bloqueou este canal</strong> porque ele não é seguro (HTTP), mas o site é seguro (HTTPS).</p>
+                    <p class="text-brand-500 font-bold mb-1">Como resolver agora:</p>
+                    <ol class="list-decimal list-inside text-gray-400 space-y-1">
+                        <li>Clique no cadeado 🔒 na barra de endereço (ao lado da URL).</li>
+                        <li>Clique em "Configurações do Site".</li>
+                        <li>Procure por <strong>"Conteúdo não seguro"</strong> e mude para <strong>"Permitir"</strong>.</li>
+                        <li>Recarregue a página.</li>
+                    </ol>
+                </div>
                 <div class="flex gap-4">
                     <button onclick="closePlayer()" class="px-6 py-2 border border-gray-600 text-white rounded hover:bg-gray-800">Voltar</button>
                     <button onclick="retryStream()" class="px-6 py-2 bg-brand-600 text-white rounded hover:bg-brand-500">Tentar Novamente</button>
@@ -321,35 +335,30 @@
             };
         }
 
-        // --- Layout Control (NOVO) ---
+        // --- Layout Control ---
         function toggleLayout(isHome) {
             const sidebar = document.getElementById('mainSidebar');
             const mainHeader = document.getElementById('mainHeader');
             const mobileHeader = document.getElementById('mobileHeader');
 
             if (isHome) {
-                // Esconder Sidebar e Headers
                 sidebar.classList.remove('lg:flex');
                 sidebar.classList.add('hidden');
-                
                 mainHeader.classList.remove('flex');
                 mainHeader.classList.add('hidden');
-
                 mobileHeader.classList.remove('flex');
                 mobileHeader.classList.add('hidden');
             } else {
-                // Mostrar Sidebar e Headers (Restaurar classes originais)
                 sidebar.classList.add('lg:flex');
                 sidebar.classList.remove('hidden');
-
                 mainHeader.classList.add('flex');
                 mainHeader.classList.remove('hidden');
-
                 mobileHeader.classList.add('flex');
                 mobileHeader.classList.remove('hidden');
             }
         }
 
+        // --- Parser Reforçado para URLs Quebradas ---
         function parseM3U(content) {
             const lines = content.split(/\r?\n/);
             const channels = [];
@@ -378,7 +387,13 @@
                     else if (groupLower.match(/series|série|temporada/)) currentChannel.type = 'series';
                     else currentChannel.type = 'live';
                 } else if (isValidUrlLine(line)) {
-                    if (line.startsWith('://')) line = 'http' + line; 
+                    // CORREÇÃO CRÍTICA DE URL
+                    if (line.startsWith('://')) {
+                         // Remove porta vazia se existir e adiciona http
+                         line = line.replace(':/', '/');
+                         line = 'http' + line; 
+                    }
+                    
                     currentChannel.url = line;
                     if (!hasInfo) {
                         currentChannel.name = `Canal ${channels.length + 1}`;
@@ -482,7 +497,7 @@
         function showHomeScreen() {
             currentCategory = 'home';
             currentSubCategoryType = null;
-            toggleLayout(true); // ESCONDE SIDEBAR E HEADERS
+            toggleLayout(true);
             
             document.getElementById('homeScreen').classList.remove('hidden');
             document.getElementById('homeScreen').classList.add('flex');
@@ -492,7 +507,7 @@
 
         function renderSubcategories(type) {
             currentSubCategoryType = type;
-            toggleLayout(false); // MOSTRA SIDEBAR E HEADERS
+            toggleLayout(false); 
 
             const relevantGroups = [...new Set(allChannels.filter(c => c.type === type).map(c => c.group))].sort();
             const grid = document.getElementById('subcategoriesGrid');
@@ -536,7 +551,6 @@
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const countEl = document.getElementById('channelCount');
             
-            // Certifica que layout está visível se acessado diretamente
             if(document.getElementById('mainSidebar').classList.contains('hidden')) toggleLayout(false);
 
             document.getElementById('homeScreen').classList.add('hidden');
@@ -601,7 +615,7 @@
             if (['live', 'movies', 'series'].includes(cat)) {
                 renderSubcategories(cat);
             } else {
-                toggleLayout(false); // Força layout normal para favoritos/all
+                toggleLayout(false); 
                 applyFilters();
             }
         }
@@ -691,6 +705,13 @@
             document.getElementById('playerGroup').textContent = channel.group;
 
             let playUrl = channel.url;
+            
+            // Detectar bloqueio de mixed content
+            if (window.location.protocol === 'https:' && playUrl.startsWith('http:')) {
+                // Não impede de tentar, mas já prepara para erro
+                console.warn('Tentando reproduzir HTTP em HTTPS. Pode ser bloqueado.');
+            }
+
             if (playUrl.includes('.ts')) {
                 playUrl = playUrl.replace('.ts', '.m3u8');
             }
@@ -706,8 +727,13 @@
                 hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(()=>{}));
                 hls.on(Hls.Events.ERROR, (e, data) => {
                     if (data.fatal) {
-                        if(data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-                        else handleVideoError();
+                        if(data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                             console.log("Erro de rede, possível bloqueio ou CORS");
+                             hls.startLoad();
+                             // Se falhar repetidamente, vai para o onError do vídeo que chama handleVideoError
+                        } else {
+                             handleVideoError();
+                        }
                     }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -723,7 +749,10 @@
             if(hls) { hls.destroy(); hls = null; }
         }
 
-        function handleVideoError() { document.getElementById('playerError').classList.remove('hidden'); }
+        function handleVideoError() { 
+            document.getElementById('playerError').classList.remove('hidden'); 
+        }
+        
         function retryStream() { 
             document.getElementById('playerError').classList.add('hidden'); 
             if(hls && hls.url) { hls.loadSource(hls.url); hls.attachMedia(video); }
