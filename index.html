@@ -75,7 +75,7 @@
             <div class="text-center mb-8">
                 <i class="ph ph-television-simple text-6xl text-brand-500 mb-4 inline-block"></i>
                 <h1 class="text-3xl font-bold text-white mb-2">PlayerFLOW</h1>
-                <p class="text-gray-400">Carregue sua lista para começar</p>
+                <p class="text-gray-400">Arraste sua lista para começar</p>
             </div>
 
             <div class="space-y-6">
@@ -387,11 +387,16 @@
                     else if (groupLower.match(/series|série|temporada/)) currentChannel.type = 'series';
                     else currentChannel.type = 'live';
                 } else if (isValidUrlLine(line)) {
-                    // CORREÇÃO CRÍTICA DE URL
+                    // CORREÇÃO CRÍTICA DE URL PARA SUA LISTA
                     if (line.startsWith('://')) {
-                         // Remove porta vazia se existir e adiciona http
-                         line = line.replace(':/', '/');
-                         line = 'http' + line; 
+                         // Remove "://" inicial e reconstrói
+                         // Ex: ://1fcpbqww8.vip:/759654...
+                         // 1. Remove ://
+                         let clean = line.substring(3);
+                         // 2. Procura pela primeira ocorrência de ":/" e substitui por "/" para arrumar porta vazia
+                         clean = clean.replace(':/', '/');
+                         // 3. Adiciona http://
+                         line = 'http://' + clean; 
                     }
                     
                     currentChannel.url = line;
@@ -410,7 +415,8 @@
         }
 
         function isValidUrlLine(line) {
-            return line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('://') || (line.endsWith('.ts') && !line.startsWith('#')) || (line.endsWith('.m3u8') && !line.startsWith('#'));
+            // Aceita formatos comuns e o formato "quebrado" da lista
+            return line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('://') || (line.endsWith('.ts') && !line.startsWith('#')) || (line.endsWith('.m3u8') && !line.startsWith('#')) || (line.endsWith('.mp4') && !line.startsWith('#'));
         }
 
         function generateId(url) {
@@ -712,13 +718,28 @@
                 console.warn('Tentando reproduzir HTTP em HTTPS. Pode ser bloqueado.');
             }
 
+            // Conversão HLS apenas se for .ts
             if (playUrl.includes('.ts')) {
                 playUrl = playUrl.replace('.ts', '.m3u8');
             }
+            // OBS: Se for .mp4, initVideo já vai tratar corretamente abaixo
+            
             initVideo(playUrl);
         }
 
         function initVideo(url) {
+            // DETECÇÃO INTELIGENTE DE FORMATO (MP4 vs HLS)
+            const isMP4 = url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.mkv');
+            
+            if (isMP4) {
+                 console.log("Reproduzindo MP4/MKV nativo:", url);
+                 if(hls) { hls.destroy(); hls = null; }
+                 video.src = url;
+                 video.play().catch(e => console.error("Erro autoplay MP4:", e));
+                 return;
+            }
+
+            // Se não for MP4, tenta HLS
             if (Hls.isSupported()) {
                 if(hls) hls.destroy();
                 hls = new Hls({ enableWorker: true, lowLatencyMode: true });
@@ -730,7 +751,6 @@
                         if(data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                              console.log("Erro de rede, possível bloqueio ou CORS");
                              hls.startLoad();
-                             // Se falhar repetidamente, vai para o onError do vídeo que chama handleVideoError
                         } else {
                              handleVideoError();
                         }
