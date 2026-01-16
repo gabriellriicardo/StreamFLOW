@@ -112,8 +112,8 @@
 
     <!-- Layout Principal -->
     <div class="flex h-full">
-        <!-- Sidebar -->
-        <aside class="hidden lg:flex w-64 bg-dark-800 border-r border-dark-700 flex-col z-20">
+        <!-- Sidebar (Adicionado ID mainSidebar para controle) -->
+        <aside class="hidden lg:flex w-64 bg-dark-800 border-r border-dark-700 flex-col z-20 transition-all duration-300" id="mainSidebar">
             <div class="h-16 flex items-center px-6 border-b border-dark-700 shrink-0">
                 <i class="ph ph-play-circle text-3xl text-brand-500"></i>
                 <span class="ml-3 font-bold text-xl">PlayerFLOW</span>
@@ -154,9 +154,9 @@
         </aside>
 
         <!-- Main -->
-        <main class="flex-1 flex flex-col bg-dark-900 relative min-w-0">
-            <!-- Mobile Header -->
-            <div class="lg:hidden h-16 bg-dark-800 border-b border-dark-700 flex items-center justify-between px-4 shrink-0">
+        <main class="flex-1 flex flex-col bg-dark-900 relative min-w-0 transition-all duration-300">
+            <!-- Mobile Header (Adicionado ID mobileHeader) -->
+            <div class="lg:hidden h-16 bg-dark-800 border-b border-dark-700 flex items-center justify-between px-4 shrink-0" id="mobileHeader">
                  <div class="flex items-center"><i class="ph ph-play-circle text-2xl text-brand-500"></i><span class="ml-2 font-bold text-lg">PlayerFLOW</span></div>
                 <button onclick="document.getElementById('mobileMenu').classList.toggle('hidden')" class="text-white p-2"><i class="ph ph-list text-2xl"></i></button>
             </div>
@@ -169,8 +169,8 @@
                  <button onclick="location.reload()" class="w-full mt-4 p-2 bg-red-900/30 text-red-400 rounded text-sm">Sair</button>
             </div>
             
-            <!-- Topbar -->
-            <header class="h-16 glass flex items-center justify-between px-4 lg:px-8 z-10 sticky top-0 shrink-0">
+            <!-- Topbar (Adicionado ID mainHeader) -->
+            <header class="h-16 glass flex items-center justify-between px-4 lg:px-8 z-10 sticky top-0 shrink-0" id="mainHeader">
                 <div class="flex items-center bg-dark-900/50 rounded-full px-4 py-2 w-full max-w-md border border-dark-700 focus-within:border-brand-500 transition">
                     <i class="ph ph-magnifying-glass text-gray-400 text-lg"></i>
                     <input id="searchInput" type="text" placeholder="Pesquisar..." class="bg-transparent border-none focus:outline-none text-white ml-3 w-full placeholder-gray-500">
@@ -185,47 +185,56 @@
             <div id="mainContainer" class="flex-1 overflow-y-auto p-4 lg:p-6 custom-scroll relative">
                 
                 <!-- TELA 1: HOME (CARTÕES) -->
-                <div id="homeScreen" class="hidden flex-col items-center justify-center min-h-[calc(100vh-10rem)] animate-fade-in">
+                <div id="homeScreen" class="hidden flex-col items-center justify-center min-h-[calc(100vh-10rem)] animate-fade-in w-full">
                     <div class="text-center mb-10">
-                        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-2">Bem-vindo</h2>
-                        <p class="text-gray-400">Escolha uma categoria para explorar</p>
+                        <div class="flex items-center justify-center gap-2 mb-2">
+                            <i class="ph ph-play-circle text-5xl text-brand-500"></i>
+                            <h1 class="text-4xl lg:text-5xl font-bold text-white tracking-tight">PlayerFLOW</h1>
+                        </div>
+                        <p class="text-gray-400 text-lg">Seu universo de entretenimento</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
                         <!-- Card TV Ao Vivo -->
-                        <button onclick="filterCategory('live')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-brand-500/50 transition z-10">
-                                <i class="ph ph-television text-4xl text-brand-500 group-hover:scale-110 transition"></i>
+                        <button onclick="filterCategory('live')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-brand-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-brand-500/50 transition z-10 shadow-lg">
+                                <i class="ph ph-television text-5xl text-brand-500 group-hover:scale-110 transition"></i>
                             </div>
-                            <span class="text-xl font-bold text-white z-10">TV Ao Vivo</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-live">0 Canais</span>
+                            <span class="text-2xl font-bold text-white z-10">TV Ao Vivo</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-live">0 Canais</span>
                         </button>
 
                         <!-- Card Filmes -->
-                        <button onclick="filterCategory('movies')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-purple-500/50 transition z-10">
-                                <i class="ph ph-film-strip text-4xl text-purple-500 group-hover:scale-110 transition"></i>
+                        <button onclick="filterCategory('movies')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-purple-500/50 transition z-10 shadow-lg">
+                                <i class="ph ph-film-strip text-5xl text-purple-500 group-hover:scale-110 transition"></i>
                             </div>
-                            <span class="text-xl font-bold text-white z-10">Filmes</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-movies">0 Títulos</span>
+                            <span class="text-2xl font-bold text-white z-10">Filmes</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-movies">0 Títulos</span>
                         </button>
 
                         <!-- Card Séries -->
-                        <button onclick="filterCategory('series')" class="group relative h-48 md:h-64 bg-dark-800 rounded-2xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/10 overflow-hidden flex flex-col items-center justify-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <div class="bg-dark-900 p-4 rounded-full mb-4 border border-dark-700 group-hover:border-emerald-500/50 transition z-10">
-                                <i class="ph ph-cards text-4xl text-emerald-500 group-hover:scale-110 transition"></i>
+                        <button onclick="filterCategory('series')" class="group relative h-64 md:h-80 bg-dark-800 rounded-3xl border border-dark-700 hover:border-brand-500 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-brand-500/20 overflow-hidden flex flex-col items-center justify-center">
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="bg-dark-900 p-6 rounded-full mb-6 border border-dark-700 group-hover:border-emerald-500/50 transition z-10 shadow-lg">
+                                <i class="ph ph-cards text-5xl text-emerald-500 group-hover:scale-110 transition"></i>
                             </div>
-                            <span class="text-xl font-bold text-white z-10">Séries</span>
-                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium" id="count-series">0 Títulos</span>
+                            <span class="text-2xl font-bold text-white z-10">Séries</span>
+                            <span class="text-sm text-gray-400 mt-2 z-10 font-medium bg-dark-900/50 px-3 py-1 rounded-full" id="count-series">0 Títulos</span>
                         </button>
                     </div>
+
+                    <!-- Botão Favoritos na Home -->
+                    <button onclick="filterCategory('favorites')" class="mt-10 flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors px-6 py-2 rounded-full border border-dark-700 hover:border-red-500/50 hover:bg-dark-800">
+                        <i class="ph ph-heart-fill"></i>
+                        <span>Acessar Favoritos</span>
+                    </button>
                 </div>
 
-                <!-- TELA 2: SUBCATEGORIAS (PASTAS) - NOVO! -->
-                <div id="subcategoriesView" class="hidden w-full max-w-7xl mx-auto animate-fade-in">
+                <!-- TELA 2: SUBCATEGORIAS (PASTAS) -->
+                <div id="subcategoriesView" class="hidden w-full max-w-7xl mx-auto animate-fade-in pt-4">
                     <div class="flex items-center mb-6">
                         <button onclick="showHomeScreen()" class="mr-4 p-2 rounded-full hover:bg-dark-800 text-gray-400 hover:text-white transition">
                             <i class="ph ph-arrow-left text-2xl"></i>
@@ -238,7 +247,7 @@
                 </div>
 
                 <!-- TELA 3: LISTA DE CANAIS/CONTEÚDO (Grid Final) -->
-                <div id="channelsView" class="hidden w-full max-w-7xl mx-auto">
+                <div id="channelsView" class="hidden w-full max-w-7xl mx-auto pt-4">
                     <div class="flex items-center mb-4" id="channelsHeader">
                         <button onclick="goBackToSubcategories()" class="mr-4 p-2 rounded-full hover:bg-dark-800 text-gray-400 hover:text-white transition">
                             <i class="ph ph-arrow-left text-2xl"></i>
@@ -292,13 +301,12 @@
         let filteredChannels = [];
         let favorites = JSON.parse(localStorage.getItem('streamflow_favorites') || '[]');
         let currentCategory = 'home'; 
-        let currentSubCategoryType = null; // Armazena se estamos em 'movies', 'live' ou 'series'
+        let currentSubCategoryType = null; 
         let hls = null;
         let renderedCount = 0;
         const BATCH_SIZE = 48; 
         const video = document.getElementById('videoPlayer');
 
-        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fileInput').addEventListener('change', handleFileUpload);
             document.getElementById('searchInput').addEventListener('input', debounce(handleSearch, 300));
@@ -313,7 +321,35 @@
             };
         }
 
-        // --- Parsing M3U AVANÇADO ---
+        // --- Layout Control (NOVO) ---
+        function toggleLayout(isHome) {
+            const sidebar = document.getElementById('mainSidebar');
+            const mainHeader = document.getElementById('mainHeader');
+            const mobileHeader = document.getElementById('mobileHeader');
+
+            if (isHome) {
+                // Esconder Sidebar e Headers
+                sidebar.classList.remove('lg:flex');
+                sidebar.classList.add('hidden');
+                
+                mainHeader.classList.remove('flex');
+                mainHeader.classList.add('hidden');
+
+                mobileHeader.classList.remove('flex');
+                mobileHeader.classList.add('hidden');
+            } else {
+                // Mostrar Sidebar e Headers (Restaurar classes originais)
+                sidebar.classList.add('lg:flex');
+                sidebar.classList.remove('hidden');
+
+                mainHeader.classList.add('flex');
+                mainHeader.classList.remove('hidden');
+
+                mobileHeader.classList.add('flex');
+                mobileHeader.classList.remove('hidden');
+            }
+        }
+
         function parseM3U(content) {
             const lines = content.split(/\r?\n/);
             const channels = [];
@@ -323,42 +359,31 @@
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if (!line) continue;
-
                 if (line.startsWith('#EXTINF:')) {
                     hasInfo = true;
                     currentChannel = { name: '', logo: '', group: 'Geral', url: '' };
-                    
                     const infoData = line.substring(8);
                     const lastCommaIndex = infoData.lastIndexOf(',');
                     currentChannel.name = lastCommaIndex !== -1 ? infoData.substring(lastCommaIndex + 1).trim() : "Canal Sem Nome";
-
                     const logoMatch = line.match(/tvg-logo=["']([^"']*)["']/i);
                     if (logoMatch) currentChannel.logo = logoMatch[1];
-
                     const groupMatch = line.match(/group-title=["']([^"']*)["']/i);
                     if (groupMatch) {
                         currentChannel.group = groupMatch[1];
                     } else if (currentChannel.name.toUpperCase().includes('FILMES')) {
                         currentChannel.group = "Filmes";
                     }
-                    
                     const groupLower = currentChannel.group.toLowerCase();
                     if (groupLower.match(/movie|filme|cinema|cine/)) currentChannel.type = 'movies';
                     else if (groupLower.match(/series|série|temporada/)) currentChannel.type = 'series';
                     else currentChannel.type = 'live';
-
                 } else if (isValidUrlLine(line)) {
-                    if (line.startsWith('://')) {
-                        line = 'http' + line; 
-                    }
-                    
+                    if (line.startsWith('://')) line = 'http' + line; 
                     currentChannel.url = line;
-                    
                     if (!hasInfo) {
                         currentChannel.name = `Canal ${channels.length + 1}`;
                         currentChannel.type = 'live';
                     }
-
                     if (currentChannel.name && currentChannel.url) {
                         currentChannel.id = generateId(currentChannel.url);
                         channels.push({ ...currentChannel });
@@ -382,7 +407,6 @@
             return Math.abs(hash).toString(36);
         }
 
-        // --- Carregamento ---
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -396,7 +420,6 @@
             let url = document.getElementById('urlInput').value.trim();
             if(!url) return;
             setLoading(true, "Baixando lista...");
-            
             try {
                 let response = await fetch(url);
                 if (!response.ok) throw new Error('Falha direta');
@@ -411,7 +434,7 @@
                     if (data.contents) processPlaylist(data.contents);
                     else throw new Error("Vazio");
                 } catch (proxyErr) {
-                    alert('Erro ao baixar lista. Tente baixar o arquivo .m3u no seu PC e usar a primeira opção.');
+                    alert('Erro ao baixar lista. Tente baixar o arquivo .m3u no seu PC.');
                     setLoading(false);
                 }
             }
@@ -422,16 +445,15 @@
             setTimeout(() => {
                 allChannels = parseM3U(content);
                 if (allChannels.length === 0) {
-                    alert('Nenhum canal encontrado. Verifique se o arquivo está correto.');
+                    alert('Nenhum canal encontrado.');
                     setLoading(false);
                     return;
                 }
                 allChannels.sort((a, b) => a.name.localeCompare(b.name));
-                
                 document.getElementById('setupModal').classList.add('hidden');
                 populateGroups();
                 updateHomeCounts();
-                showHomeScreen(); // MOSTRA A TELA INICIAL
+                showHomeScreen(); 
                 setLoading(false);
             }, 100);
         }
@@ -440,7 +462,6 @@
             const liveCount = allChannels.filter(c => c.type === 'live').length;
             const moviesCount = allChannels.filter(c => c.type === 'movies').length;
             const seriesCount = allChannels.filter(c => c.type === 'series').length;
-
             document.getElementById('count-live').textContent = `${liveCount} Canais`;
             document.getElementById('count-movies').textContent = `${moviesCount} Títulos`;
             document.getElementById('count-series').textContent = `${seriesCount} Títulos`;
@@ -461,46 +482,31 @@
         function showHomeScreen() {
             currentCategory = 'home';
             currentSubCategoryType = null;
+            toggleLayout(true); // ESCONDE SIDEBAR E HEADERS
             
-            // Toggle Views
             document.getElementById('homeScreen').classList.remove('hidden');
             document.getElementById('homeScreen').classList.add('flex');
             document.getElementById('subcategoriesView').classList.add('hidden');
             document.getElementById('channelsView').classList.add('hidden');
-            
-            updateSidebarUI('home');
-            document.getElementById('categoryTitle').textContent = 'Início';
-            document.getElementById('channelCount').textContent = `${allChannels.length} total`;
         }
 
         function renderSubcategories(type) {
             currentSubCategoryType = type;
-            
-            // Filtrar grupos que pertencem a este tipo
-            // Ex: Se type='movies', pega todos os grupos de canais que são 'movies'
-            const relevantGroups = [...new Set(allChannels
-                .filter(c => c.type === type)
-                .map(c => c.group)
-            )].sort();
+            toggleLayout(false); // MOSTRA SIDEBAR E HEADERS
 
+            const relevantGroups = [...new Set(allChannels.filter(c => c.type === type).map(c => c.group))].sort();
             const grid = document.getElementById('subcategoriesGrid');
             grid.innerHTML = '';
-
             const titleMap = { 'live': 'TV Ao Vivo', 'movies': 'Filmes', 'series': 'Séries' };
             document.getElementById('subcategoryTitle').textContent = `Categorias de ${titleMap[type] || 'Vídeo'}`;
 
-            if (relevantGroups.length === 0) {
-                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma categoria encontrada.</p>';
-            }
+            if (relevantGroups.length === 0) grid.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma categoria encontrada.</p>';
 
             relevantGroups.forEach(group => {
-                // Conta quantos itens tem nesse grupo
                 const count = allChannels.filter(c => c.group === group && c.type === type).length;
-                
                 const card = document.createElement('button');
                 card.className = 'bg-dark-800 p-6 rounded-xl border border-dark-700 hover:border-brand-500 hover:bg-dark-700 transition-all text-left group flex flex-col justify-between h-32';
                 card.onclick = () => filterByGroup(group);
-
                 card.innerHTML = `
                     <div class="flex items-start justify-between">
                         <i class="ph ph-folder text-3xl text-brand-500 group-hover:text-white transition"></i>
@@ -511,7 +517,6 @@
                 grid.appendChild(card);
             });
 
-            // Toggle Views
             document.getElementById('homeScreen').classList.add('hidden');
             document.getElementById('homeScreen').classList.remove('flex');
             document.getElementById('subcategoriesView').classList.remove('hidden');
@@ -521,11 +526,8 @@
         }
 
         function goBackToSubcategories() {
-            if (currentSubCategoryType) {
-                renderSubcategories(currentSubCategoryType);
-            } else {
-                showHomeScreen();
-            }
+            if (currentSubCategoryType) renderSubcategories(currentSubCategoryType);
+            else showHomeScreen();
         }
 
         function renderChannels(channels, append = false) {
@@ -534,7 +536,9 @@
             const loadMoreBtn = document.getElementById('loadMoreContainer');
             const countEl = document.getElementById('channelCount');
             
-            // Toggle Views
+            // Certifica que layout está visível se acessado diretamente
+            if(document.getElementById('mainSidebar').classList.contains('hidden')) toggleLayout(false);
+
             document.getElementById('homeScreen').classList.add('hidden');
             document.getElementById('homeScreen').classList.remove('flex');
             document.getElementById('subcategoriesView').classList.add('hidden');
@@ -594,12 +598,10 @@
         
         function filterCategory(cat) {
             currentCategory = cat;
-            
-            // Nova Lógica de Navegação
             if (['live', 'movies', 'series'].includes(cat)) {
                 renderSubcategories(cat);
             } else {
-                // Para 'all', 'favorites' ou busca, mostra a grid direta
+                toggleLayout(false); // Força layout normal para favoritos/all
                 applyFilters();
             }
         }
@@ -607,20 +609,15 @@
         function filterByGroup(group) {
             updateSidebarUI(null, group);
             currentCategory = 'group';
-            // Atualiza título da seção com botão de voltar se necessário
             document.getElementById('currentGroupTitle').textContent = group;
-            
             filteredChannels = allChannels.filter(c => c.group === group);
             renderChannels(filteredChannels);
         }
 
         function populateGroups() {
-            // Sidebar Groups (atalho rápido, mantido)
             const groups = [...new Set(allChannels.map(c => c.group))].sort();
             const groupList = document.getElementById('groupList');
             groupList.innerHTML = '';
-            
-            // Opcional: Limitar quantidade na sidebar para não poluir
             const limit = 20; 
             groups.slice(0, limit).forEach(group => {
                 const btn = document.createElement('button');
@@ -636,36 +633,27 @@
                 el.classList.remove('bg-brand-600/10', 'text-brand-500');
                 el.classList.add('text-gray-400');
             });
-
             if (activeId === 'home') {
                 const homeBtn = document.getElementById('btn-home');
                 if(homeBtn) { homeBtn.classList.remove('text-gray-400'); homeBtn.classList.add('bg-brand-600/10', 'text-brand-500'); }
                 return;
             }
-
             if (activeId) {
                 const btn = document.querySelector(`button[onclick="filterCategory('${activeId}')"]`);
                 if(btn) { btn.classList.remove('text-gray-400'); btn.classList.add('bg-brand-600/10', 'text-brand-500'); }
             }
-            
             Array.from(document.getElementById('groupList').children).forEach(btn => {
                 if(btn.textContent === activeGroup) { btn.classList.add('text-brand-500', 'font-bold'); btn.classList.remove('text-gray-400'); }
                 else { btn.classList.remove('text-brand-500', 'font-bold'); btn.classList.add('text-gray-400'); }
             });
-            
             const title = activeGroup || (activeId === 'all' ? 'Todos' : activeId === 'favorites' ? 'Favoritos' : activeId);
             document.getElementById('categoryTitle').textContent = title;
         }
 
         function handleSearch(e) {
             const query = e.target.value.toLowerCase();
-            // Se começar a digitar, sai da home e vai para a busca global
             if (currentCategory === 'home' && query.length > 0) {
-                 // Força view de canais direto
-                 document.getElementById('homeScreen').classList.add('hidden');
-                 document.getElementById('homeScreen').classList.remove('flex');
-                 document.getElementById('subcategoriesView').classList.add('hidden');
-                 document.getElementById('channelsView').classList.remove('hidden');
+                 filterCategory('all');
             }
             applyFilters(query);
         }
@@ -674,11 +662,8 @@
             let list = allChannels;
             if (currentCategory === 'favorites') list = list.filter(c => favorites.includes(c.id));
             else if (['live', 'movies', 'series'].includes(currentCategory)) list = list.filter(c => c.type === currentCategory);
-            // Nota: Se for 'group', já foi filtrado no filterByGroup, mas aqui refinamos busca
-
             const query = searchQuery || document.getElementById('searchInput').value.toLowerCase();
             if (query) list = list.filter(c => c.name.toLowerCase().includes(query) || c.group.toLowerCase().includes(query));
-            
             filteredChannels = list;
             renderChannels(list);
         }
@@ -709,7 +694,6 @@
             if (playUrl.includes('.ts')) {
                 playUrl = playUrl.replace('.ts', '.m3u8');
             }
-
             initVideo(playUrl);
         }
 
