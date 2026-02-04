@@ -11,10 +11,16 @@
           "value": "public, max-age=0, must-revalidate"
         },
         {
-            "key": "X-Frame-Options",
-            "value": "DENY"
+          "key": "X-Frame-Options",
+          "value": "DENY"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+    "name": "StreamFlow IPTV",
+    "short_name": "StreamFlow",
+    "description": "Player IPTV web moderno com suporte a HLS.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "icons": [
+      {
+        "src": "https://phosphoricons.com/assets/regular/television-simple.svg",
+        "type": "image/svg+xml",
+        "sizes": "192x192"
+      },
+      {
+        "src": "https://phosphoricons.com/assets/regular/television-simple.svg",
+        "type": "image/svg+xml",
+        "sizes": "512x512"
+      }
+    ],
+    "orientation": "landscape"
+}
