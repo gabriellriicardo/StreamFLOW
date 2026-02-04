@@ -836,28 +836,46 @@
             group.textContent = channel.group;
 
             let finalUrl = channel.url;
+            let needsProxy = false;
 
-            // Smart Proxy Logic (Mixed Content Fix)
+            // Detect Mixed Content / CORS need
             const isHttps = window.location.protocol === 'https:';
             const isHttpStream = channel.url.toLowerCase().startsWith('http:');
 
             if (isHttps && isHttpStream) {
-                console.log("HTTPS detectado + Stream HTTP. Ativando Smart Proxy...");
-                finalUrl = `/api/proxy?url=${encodeURIComponent(channel.url)}`;
+                console.log("🔒 Modo de Compatibilidade Ativado: Proxying completo.");
+                needsProxy = true;
+                // NÃO mudamos a URL aqui. Deixamos a original.
+                // O HLS interceptor vai mudar TUDO.
             }
 
-            initVideo(finalUrl);
+            initVideo(finalUrl, needsProxy);
         }
 
-        function initVideo(url) {
+        function initVideo(url, useProxy = false) {
             if (Hls.isSupported()) {
                 if (hls) {
                     hls.destroy();
                 }
-                hls = new Hls({
+
+                // Configuração Avançada do HLS
+                const config = {
                     enableWorker: true,
                     lowLatencyMode: true,
-                });
+                };
+
+                // Se precisar de proxy, interceptamos TODOS os requests (XHR)
+                if (useProxy) {
+                    config.xhrSetup = function (xhr, url) {
+                        // Apenas se não for já uma URL do nosso proxy
+                        if (!url.includes('/api/proxy')) {
+                            const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+                            xhr.open('GET', proxyUrl, true);
+                        }
+                    };
+                }
+
+                hls = new Hls(config);
                 hls.loadSource(url);
                 hls.attachMedia(video);
                 hls.on(Hls.Events.MANIFEST_PARSED, function () {
