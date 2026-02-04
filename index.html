@@ -835,13 +835,18 @@
             title.textContent = channel.name;
             group.textContent = channel.group;
 
-            // Verifica Mixed Content
-            if (window.location.protocol === 'https:' && channel.url.startsWith('http:')) {
-                // Aviso preventivo, mas tenta tocar
-                console.warn("Tentando reproduzir HTTP em ambiente HTTPS");
+            let finalUrl = channel.url;
+
+            // Smart Proxy Logic (Mixed Content Fix)
+            const isHttps = window.location.protocol === 'https:';
+            const isHttpStream = channel.url.toLowerCase().startsWith('http:');
+
+            if (isHttps && isHttpStream) {
+                console.log("HTTPS detectado + Stream HTTP. Ativando Smart Proxy...");
+                finalUrl = `/api/proxy?url=${encodeURIComponent(channel.url)}`;
             }
 
-            initVideo(channel.url);
+            initVideo(finalUrl);
         }
 
         function initVideo(url) {
